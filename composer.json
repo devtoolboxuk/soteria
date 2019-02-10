@@ -1,0 +1,30 @@
+{
+  "name": "soteria/secure",
+  "description": "Security Package for PHP",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "soteria\\secure\\": "src/"
+    },
+    "classmap": [
+      "src"
+    ]
+  },
+  "authors": [
+    {
+      "name": "Rob Wilson",
+      "email": "rob@dev-toolbox.co.uk"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.16"
+  },
+  "minimum-stability": "dev",
+  "scripts": {
+    "test": "./vendor/bin/phpunit"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*"
+  }
+}
