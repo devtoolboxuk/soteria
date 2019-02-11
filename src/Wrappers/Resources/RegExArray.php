@@ -1,11 +1,11 @@
 <?php
 
-namespace soteria\secure\Wrappers;
+namespace soteria\secure\Wrappers\Resources;
 
-class RegExWrapper extends Wrapper
+class RegExArray
 {
 
-    private $_never_allowed_regex = [
+    private $dataArray = [
         // default javascript
         'javascript\s*:',
         // default javascript
@@ -41,14 +41,9 @@ class RegExWrapper extends Wrapper
     ];
 
 
-    public function process()
+    function getData()
     {
-        $value = $this->getValue();
-        foreach ($this->_never_allowed_regex as $regEx) {
-            $value = preg_replace('#' . $regEx . '#is', $this->getReplacementValue(), $value);
-        }
-        $this->setValue($value);
-
+        return $this->dataArray;
     }
 
 }

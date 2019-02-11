@@ -1,11 +1,11 @@
 <?php
 
-namespace soteria\secure\Wrappers;
+namespace soteria\secure\Wrappers\Resources;
 
-class StringWrapper extends Wrapper
+class StringArray
 {
 
-    private $stringArray = [
+    private $dataArray = [
         'FSCommand',
         'onAbort',
         'onActivate',
@@ -223,20 +223,9 @@ class StringWrapper extends Wrapper
     ];
 
 
-    public function process()
+    function getData()
     {
-        $value = $this->getValue();
-        foreach ($this->stringArray as $string) {
-
-            $value =  str_ireplace(
-                $string,
-                $this->getReplacementValue(),
-                $value
-            );
-
-        }
-        $this->setValue($value);
-
+        return $this->dataArray;
     }
 
 }

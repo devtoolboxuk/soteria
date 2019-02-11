@@ -28,24 +28,19 @@ abstract class AbstractSecurity
         }
     }
 
-    protected function processWrappersx($handler)
-    {
-        $options = $this->getOption('Detection');
-
-        foreach ($handler->getWrappers() as $wrapper) {
-
-            $wrapper->setOptions($handler->getValue(), $options['Rules']);
-            $wrapper->process();
-            $this->addResult($wrapper->getScore(), $wrapper->getResult());
-        }
-    }
 
     protected function processWrappers($handler)
     {
+        $value = '';
         foreach ($handler->getWrappers() as $wrapper) {
-            $wrapper->setValue($handler->getValue());
+           if ($value == '') {
+               $value = $handler->getValue();
+           }
+            $wrapper->setValue($value);
             $wrapper->process();
-            $this->setResult($wrapper->getValue());
+
+            $value = $wrapper->getValue();
+            $this->setResult($value);
         }
     }
 
