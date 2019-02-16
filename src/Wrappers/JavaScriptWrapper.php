@@ -19,17 +19,16 @@ class JavaScriptWrapper extends Wrapper
 
     public function process()
     {
-        $value = $this->getValue();
 
-        $value = $this->explodedJavaScript($value);
-        $value = $this->removeDisallowedJavaScript($value);
-        $value = $this->sanitizeJavascript($value);
+        $this->explodedJavaScript();
+        $this->removeDisallowedJavaScript();
+        $this->sanitizeJavascript();
 
-        $this->setValue($value);
     }
 
-    private function explodedJavaScript($value)
+    private function explodedJavaScript()
     {
+        $value = $this->getValue();
         $javaScriptArray = new JavaScriptArray();
         foreach ($javaScriptArray->getData() as $word) {
             if (!isset($this->wordCache[$word])) {
@@ -42,8 +41,7 @@ class JavaScriptWrapper extends Wrapper
             } else {
                 $value = $this->wordCache[$word];
             }
-            // We only want to do this when it is followed by a non-word character
-            // That way valid stuff like "dealer to" does not become "dealerto".
+
             $value = (string)preg_replace_callback(
                 '#(?<word>' . $word . ')(?<rest>\W)#is',
                 [
@@ -53,11 +51,13 @@ class JavaScriptWrapper extends Wrapper
                 $value
             );
         }
-        return $value;
+        $this->setValue($value);
     }
 
-    private function removeDisallowedJavascript($value)
+    private function removeDisallowedJavascript()
     {
+        $value = $this->getValue();
+
         do {
             $original = $value;
             if (stripos($value, '<a') !== false) {
@@ -119,17 +119,18 @@ class JavaScriptWrapper extends Wrapper
                 );
             }
         } while ($original !== $value);
-        return (string)$value;
+        $this->setValue($value);
     }
 
-    private function sanitizeJavascript($value)
+    private function sanitizeJavascript()
     {
+        $value = $this->getValue();
         $value = (string)preg_replace(
             '#(alert|eval|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*)\)#siU',
             '\\1\\2&#40;\\3&#41;',
             $value
         );
-        return (string)$value;
+        $this->setValue($value);
     }
 
     private function linkRemovalCallback(array $match)

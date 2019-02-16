@@ -3,10 +3,10 @@
 namespace soteria\secure\Wrappers;
 
 use soteria\secure\Wrappers\Resources\HtmlArray;
+use soteria\secure\Wrappers\Resources\HtmlAttributesArray;
 
 class HtmlWrapper extends Wrapper
 {
-
 
     private $name;
 
@@ -18,7 +18,12 @@ class HtmlWrapper extends Wrapper
 
     public function process()
     {
+        $this->replaceHtml();
+        $this->removeEmptyAttributes();
+    }
 
+    private function replaceHtml()
+    {
         $value = $this->getValue();
         $htmlArray = new HtmlArray();
         $tags = implode('|', $htmlArray->getData());
@@ -30,7 +35,23 @@ class HtmlWrapper extends Wrapper
             ],
             $value
         );
+        $this->setValue($value);
+    }
 
+    private function removeEmptyAttributes()
+    {
+        $value = $this->getValue();
+
+        $HTMLattributesArray = new HtmlAttributesArray();
+
+        foreach ($HTMLattributesArray->getData() as $string) {
+
+            $value = str_replace(
+                $string . '=""',
+                $this->getReplacementValue(),
+                $value
+            );
+        }
 
         $this->setValue($value);
     }

@@ -2,6 +2,7 @@
 
 namespace soteria\secure\Wrappers;
 
+use soteria\secure\Wrappers\Resources\EntitiesArray;
 use soteria\secure\Wrappers\Resources\RegExArray;
 
 class XssInitialise extends Wrapper
@@ -20,9 +21,32 @@ class XssInitialise extends Wrapper
     {
 
         $value = $this->getValue();
+
+        $this->decodeString();
+        $this->decodeEntity();
+
+        $this->setValue($value);
+    }
+
+    function decodeString()
+    {
+        $value = $this->getValue();
+
         $regExArray = new RegExArray();
         foreach ($regExArray->getData() as $regEx) {
             $value = (string)preg_replace('#' . $regEx . '#is', $this->getReplacementValue(), $value);
+        }
+
+        $this->setValue($value);
+    }
+
+    private function decodeEntity()
+    {
+        $value = $this->getValue();
+        $entitiesArray = new EntitiesArray();
+
+        foreach ($entitiesArray->getData() as $key=>$entity) {
+            $value = str_replace($key,$entity, $value);
         }
 
         $this->setValue($value);

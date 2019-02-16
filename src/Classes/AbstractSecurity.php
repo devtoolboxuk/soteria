@@ -23,6 +23,7 @@ abstract class AbstractSecurity
 
     public function processHandler()
     {
+
         foreach ($this->handlers as $handler) {
             $this->processWrappers($handler);
         }
@@ -32,7 +33,10 @@ abstract class AbstractSecurity
     protected function processWrappers($handler)
     {
         $value = '';
-        foreach ($handler->getWrappers() as $wrapper) {
+
+        $wrappers = array_reverse($handler->getWrappers());
+
+        foreach ($wrappers as $wrapper) {
            if ($value == '') {
                $value = $handler->getValue();
            }
