@@ -20,14 +20,6 @@ class XssFinalise extends Wrapper
     {
         $this->stringReplace();
 
-        $this->cleanString();
-    }
-
-    private function cleanString()
-    {
-        $value = $this->getValue();
-        $value = strip_tags($value);
-        $this->setValue($value);
     }
 
     private function stringReplace()

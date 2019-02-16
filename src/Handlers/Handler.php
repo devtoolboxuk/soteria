@@ -14,7 +14,6 @@ class Handler extends AbstractHandler
 
     function build($method, $arguments = [])
     {
-
         $className = __NAMESPACE__ .'\\'. ucfirst($method).'Handler';
 
         if (class_exists($className)) {

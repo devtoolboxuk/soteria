@@ -37,9 +37,12 @@ abstract class AbstractSecurity
         $wrappers = array_reverse($handler->getWrappers());
 
         foreach ($wrappers as $wrapper) {
-           if ($value == '') {
-               $value = $handler->getValue();
-           }
+
+            if ($value == '') {
+                $value = $handler->getValue();
+            }
+
+            $wrapper->setPassArray($handler->getPassArray());
             $wrapper->setValue($value);
             $wrapper->process();
 
@@ -49,7 +52,7 @@ abstract class AbstractSecurity
     }
 
 
-    protected function setResult( $result)
+    protected function setResult($result)
     {
         $this->result = $result;
         return $this;

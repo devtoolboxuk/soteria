@@ -26,7 +26,7 @@ class HtmlWrapper extends Wrapper
     {
         $value = $this->getValue();
         $htmlArray = new HtmlArray();
-        $tags = implode('|', $htmlArray->getData());
+        $tags = implode('|', $this->getArrayData($htmlArray->getData(), 'html'));
         $value = (string)preg_replace_callback(
             '#<(?<start>/*\s*)(?<content>' . $tags . ')(?<end>[^><]*)(?<rest>[><]*)#i',
             [
@@ -44,7 +44,7 @@ class HtmlWrapper extends Wrapper
 
         $HTMLattributesArray = new HtmlAttributesArray();
 
-        foreach ($HTMLattributesArray->getData() as $string) {
+        foreach ($this->getArrayData($HTMLattributesArray->getData(), 'html') as $string) {
 
             $value = str_replace(
                 $string . '=""',

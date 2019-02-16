@@ -7,6 +7,7 @@ abstract class AbstractHandler
     private $active = false;
     private $wrappers = [];
     private $value;
+    private $passArray;
     private $name;
 
     private $score;
@@ -24,6 +25,16 @@ abstract class AbstractHandler
     protected function setValue($value)
     {
         $this->value = $value;
+        return $this;
+    }
+    function getPassArray()
+    {
+        return $this->passArray;
+    }
+
+    public function setPassArray($passArray)
+    {
+        $this->passArray = $passArray;
         return $this;
     }
 
