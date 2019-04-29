@@ -1,39 +1,24 @@
 <?php
 
-namespace soteria\secure\classes;
+namespace devtoolboxuk\soteria;
 
-abstract class AbstractSecurity
+use devtoolboxuk\soteria\Models\SoteriaModel;
+
+abstract class AbstractService
 {
-
-    public $rules = [];
-
+    private static $instance = null;
     protected $result;
 
-
-    public function __construct()
+    protected function processHandler()
     {
-    }
-
-    public function pushHandler($handler)
-    {
-        array_unshift($this->handlers, $handler);
-        return $this;
-    }
-
-
-    public function processHandler()
-    {
-
         foreach ($this->handlers as $handler) {
             $this->processWrappers($handler);
         }
     }
 
-
     protected function processWrappers($handler)
     {
         $value = '';
-
         $wrappers = array_reverse($handler->getWrappers());
 
         foreach ($wrappers as $wrapper) {
@@ -51,10 +36,31 @@ abstract class AbstractSecurity
         }
     }
 
-
     protected function setResult($result)
     {
         $this->result = $result;
+        return $this;
+    }
+
+    protected function process()
+    {
+        foreach ($this->handlers as $handler) {
+            array_unshift($this->references, ['name' => $handler->getName(), 'value' => $handler->getValue()]);
+            $this->processWrappers($handler);
+        }
+
+        if (self::$instance === null) {
+            self::$instance = new SoteriaModel($this->result);
+        }
+
+        return self::$instance;
+    }
+
+    protected function resetHandler()
+    {
+        $this->references = [];
+        $this->handlers = [];
+        self::$instance = null;
         return $this;
     }
 

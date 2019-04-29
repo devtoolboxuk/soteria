@@ -1,9 +1,9 @@
 <?php
 
-namespace soteria\secure\Wrappers;
+namespace devtoolboxuk\soteria\Wrappers;
 
-use soteria\secure\Wrappers\Resources\HtmlArray;
-use soteria\secure\Wrappers\Resources\HtmlAttributesArray;
+use devtoolboxuk\soteria\Wrappers\Resources\HtmlArray;
+use devtoolboxuk\soteria\Wrappers\Resources\HtmlAttributesArray;
 
 class HtmlWrapper extends Wrapper
 {

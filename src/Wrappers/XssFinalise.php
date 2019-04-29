@@ -1,9 +1,9 @@
 <?php
 
-namespace soteria\secure\Wrappers;
+namespace devtoolboxuk\soteria\Wrappers;
 
 
-use soteria\secure\Wrappers\Resources\StringArray;
+use devtoolboxuk\soteria\Wrappers\Resources\StringArray;
 
 class XssFinalise extends Wrapper
 {

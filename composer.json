@@ -1,11 +1,11 @@
 {
-  "name": "soteria/secure",
+  "name": "devtoolboxuk/soteria",
   "description": "Security Package for PHP",
   "type": "library",
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "soteria\\secure\\": "src/"
+      "devtoolboxuk\\soteria\\": "src/"
     },
     "classmap": [
       "src"

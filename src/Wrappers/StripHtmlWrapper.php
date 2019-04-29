@@ -1,6 +1,6 @@
 <?php
 
-namespace soteria\secure\Wrappers;
+namespace devtoolboxuk\soteria\Wrappers;
 
 class StripHtmlWrapper extends Wrapper
 {

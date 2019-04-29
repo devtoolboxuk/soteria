@@ -1,8 +1,8 @@
 <?php
 
-namespace soteria\secure\handlers;
+namespace devtoolboxuk\soteria\handlers;
 
-use soteria\secure\Wrappers\StripHtmlWrapper;
+use devtoolboxuk\soteria\Wrappers\StripHtmlWrapper;
 
 class HtmlHandler extends Handler
 {

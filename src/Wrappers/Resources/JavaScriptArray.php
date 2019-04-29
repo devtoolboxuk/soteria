@@ -1,6 +1,6 @@
 <?php
 
-namespace soteria\secure\Wrappers\Resources;
+namespace devtoolboxuk\soteria\Wrappers\Resources;
 
 class JavaScriptArray
 {

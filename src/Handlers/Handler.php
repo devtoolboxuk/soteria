@@ -1,6 +1,6 @@
 <?php
 
-namespace soteria\secure\handlers;
+namespace devtoolboxuk\soteria\handlers;
 
 use ReflectionClass;
 

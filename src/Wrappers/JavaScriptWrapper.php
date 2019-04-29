@@ -1,8 +1,8 @@
 <?php
 
-namespace soteria\secure\Wrappers;
+namespace devtoolboxuk\soteria\Wrappers;
 
-use soteria\secure\Wrappers\Resources\JavaScriptArray;
+use devtoolboxuk\soteria\Wrappers\Resources\JavaScriptArray;
 
 class JavaScriptWrapper extends Wrapper
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace soteria\secure\Wrappers;
+namespace devtoolboxuk\soteria\Wrappers;
 
-use soteria\secure\Wrappers\Resources\EntitiesArray;
-use soteria\secure\Wrappers\Resources\RegExArray;
+use devtoolboxuk\soteria\Wrappers\Resources\EntitiesArray;
+use devtoolboxuk\soteria\Wrappers\Resources\RegExArray;
 
 class XssInitialise extends Wrapper
 {

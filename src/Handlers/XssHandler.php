@@ -1,13 +1,13 @@
 <?php
 
-namespace soteria\secure\handlers;
+namespace devtoolboxuk\soteria\handlers;
 
-use soteria\secure\Wrappers\AttributeWrapper;
-use soteria\secure\Wrappers\HtmlWrapper;
-use soteria\secure\Wrappers\JavaScriptWrapper;
-use soteria\secure\Wrappers\UtfWrapper;
-use soteria\secure\Wrappers\XssFinalise;
-use soteria\secure\Wrappers\XssInitialise;
+use devtoolboxuk\soteria\Wrappers\AttributeWrapper;
+use devtoolboxuk\soteria\Wrappers\HtmlWrapper;
+use devtoolboxuk\soteria\Wrappers\JavaScriptWrapper;
+use devtoolboxuk\soteria\Wrappers\UtfWrapper;
+use devtoolboxuk\soteria\Wrappers\XssFinalise;
+use devtoolboxuk\soteria\Wrappers\XssInitialise;
 
 class XssHandler extends Handler
 {

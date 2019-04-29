@@ -1,13 +1,13 @@
 <?php
 
-namespace soteria\secure\Wrappers\Resources;
+namespace devtoolboxuk\soteria\Wrappers\Resources;
 
 /**
  *
  * Full list from here - https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
  *
  * Class HtmlAttributesArray
- * @package soteria\secure\Wrappers\Resources
+ * @package devtoolboxuk\soteria\Wrappers\Resources
  */
 class HtmlAttributesArray
 {

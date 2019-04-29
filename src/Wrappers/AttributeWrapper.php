@@ -1,9 +1,9 @@
 <?php
 
-namespace soteria\secure\Wrappers;
+namespace devtoolboxuk\soteria\Wrappers;
 
 
-use soteria\secure\Wrappers\Resources\AttributesArray;
+use devtoolboxuk\soteria\Wrappers\Resources\AttributesArray;
 
 class AttributeWrapper extends Wrapper
 {
