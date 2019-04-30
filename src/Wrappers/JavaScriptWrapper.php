@@ -138,7 +138,12 @@ class JavaScriptWrapper extends Wrapper
         return $this->removalCallback($match, 'href');
     }
 
-    private function removalCallback(array $match, string $search)
+    /**
+     * @param array $match
+     * @param string $search
+     * @return mixed|string
+     */
+    private function removalCallback(array $match, $search)
     {
         if (!$match[0]) {
             return '';
@@ -180,7 +185,11 @@ class JavaScriptWrapper extends Wrapper
         return $return;
     }
 
-    private function filterAttributes(string $value)
+    /**
+     * @param string $value
+     * @return string
+     */
+    private function filterAttributes($value)
     {
         if ($value === '') {
             return '';
