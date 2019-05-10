@@ -1,11 +1,22 @@
 <?php
 
-namespace devtoolboxuk\soteria\Wrappers\Resources;
-
-class HtmlArray
+namespace devtoolboxuk\soteria\Resources;
+class Evil extends Resources
 {
 
-    private $dataArray = [
+    private $_evil_attributes_regex = [
+        'on\w*',
+        'style',
+        'xmlns:xdp',
+        'formaction',
+        'form',
+        'xlink:href',
+        'seekSegmentTime',
+        'FSCommand',
+    ];
+
+
+    private $_evil_html_tags = [
         'applet',
         'alert',
         'audio',
@@ -44,13 +55,17 @@ class HtmlArray
         'source',
         'svg',
         'xml',
-        'xss',
     ];
 
-
-    function getData()
+    public function regEx()
     {
-        return $this->dataArray;
+        return $this->_evil_attributes_regex;
     }
+
+    public function html()
+    {
+        return $this->_evil_html_tags;
+    }
+
 
 }

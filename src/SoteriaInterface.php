@@ -4,8 +4,6 @@ namespace devtoolboxuk\soteria;
 
 interface SoteriaInterface
 {
-    public function pushHandler($handler);
-    
-    public function getResult();
+    public function xss_clean($string);
 
 }

@@ -1,12 +1,22 @@
 <?php
 
-namespace devtoolboxuk\soteria\Wrappers\Resources;
-
-class StringArray
+namespace devtoolboxuk\soteria\Resources;
+class NeverAllowed extends Resources
 {
 
-    private $dataArray = [
-        'FSCommand',
+    private $_never_allowed_reg_ex = [
+
+            // default javascript
+            '(\(?document\)?|\(?window\)?(\.document)?)\.(location|on\w*)',
+            // data-attribute + base64
+            "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
+            // remove Netscape 4 JS entities
+            '&\s*\{[^}]*(\}\s*;?|$)',
+            // old IE, old Netscape
+            'expression\s*(\(|&\#40;)',
+        ];
+
+    private $_never_allowed_on_events_afterwards = [
         'onAbort',
         'onActivate',
         'onAttribute',
@@ -218,14 +228,161 @@ class StringArray
         'onWebKitFullScreenError',
         'onWebKitTransitionEnd',
         'onWheel',
+    ];
+
+    private $_never_allowed_str_afterwards = [
+        'FSCOMMAND',
         '&lt;script&gt;',
         '&lt;/script&gt;',
     ];
 
+    private $_never_allowed_str = [];
 
-    function getData()
+    private $_never_allowed_call_statements = [
+        // default javascript
+        'javascript',
+        // Java: jar-protocol is an XSS hazard
+        'jar',
+        // Mac (will not run the script, but open it in AppleScript Editor)
+        'applescript',
+        // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
+        'vbscript',
+        'vbs',
+        // IE, surprise!
+        'wscript',
+        // IE
+        'jscript',
+        // https://html5sec.org/#behavior
+        'behavior',
+        // old Netscape
+        'mocha',
+        // old Netscape
+        'livescript',
+        // default view source
+        'view-source',
+    ];
+
+    public function eventsAfterwards()
     {
-        return $this->dataArray;
+        return $this->_never_allowed_on_events_afterwards;
     }
+    public function strAfterwards()
+    {
+        return $this->_never_allowed_str_afterwards;
+    }
+
+    public function regEx()
+    {
+        return $this->_never_allowed_reg_ex;
+    }
+
+    public function callStatements()
+    {
+        return $this->_never_allowed_call_statements;
+    }
+
+    function __construct()
+    {
+
+
+        $this->_never_allowed_str = [
+            'document.cookie' => $this->_replacement,
+            '(document).cookie' => $this->_replacement,
+            'document.write' => $this->_replacement,
+            '(document).write' => $this->_replacement,
+            '.parentNode' => $this->_replacement,
+            '.innerHTML' => $this->_replacement,
+            '.appendChild' => $this->_replacement,
+            '-moz-binding' => $this->_replacement,
+            '<!--' => '&lt;!--',
+            '-->' => '--&gt;',
+            '<?' => '&lt;?',
+            '?>' => '?&gt;',
+            '<![CDATA[' => '&lt;![CDATA[',
+            '<!ENTITY' => '&lt;!ENTITY',
+            '<!DOCTYPE' => '&lt;!DOCTYPE',
+            '<!ATTLIST' => '&lt;!ATTLIST',
+        ];
+    }
+
+    public function strings()
+    {
+        return $this->_never_allowed_str;
+    }
+
+    public function doNeverAllowedAfterwards($str)
+    {
+        if (\stripos($str, 'on') !== false) {
+            foreach ($this->_never_allowed_on_events_afterwards as $event) {
+                if (\stripos($str, $event) !== false) {
+                    $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\s|[^\p{L}]|$)';
+
+                    do {
+                        $count = $temp_count = 0;
+
+                        $str = (string) \preg_replace(
+                            '#' . $regex . '#ius',
+                            '$1' . $this->_replacement . '$2',
+                            $str,
+                            -1,
+                            $temp_count
+                        );
+                        $count += $temp_count;
+                    } while ($count);
+                }
+            }
+        }
+
+        return (string) \str_ireplace(
+            $this->_never_allowed_str_afterwards,
+            $this->_replacement,
+            $str
+        );
+    }
+
+    public function doNeverAllowed($str)
+    {
+        static $NEVER_ALLOWED_CACHE = [];
+
+        $NEVER_ALLOWED_CACHE['keys'] = null;
+        $NEVER_ALLOWED_CACHE['regex'] = null;
+
+        if ($NEVER_ALLOWED_CACHE['keys'] === null) {
+            $NEVER_ALLOWED_CACHE['keys'] = \array_keys($this->_never_allowed_str);
+        }
+
+        $str = \str_ireplace(
+            $NEVER_ALLOWED_CACHE['keys'],
+            $this->_never_allowed_str,
+            $str
+        );
+
+        // ---
+
+        foreach ($this->_never_allowed_call_statements as $call) {
+            if (\stripos($str, $call) !== false) {
+                $str = (string) \preg_replace(
+                    '#([^\p{L}]|^)' . $call . '\s*:#ius',
+                    '$1' . $this->_replacement,
+                    $str
+                );
+            }
+        }
+
+        // ---
+
+        if ($NEVER_ALLOWED_CACHE['regex'] === null) {
+            $NEVER_ALLOWED_CACHE['regex'] = \implode('|',$this->_never_allowed_reg_ex);
+        }
+
+        $str = (string) \preg_replace(
+            '#' . $NEVER_ALLOWED_CACHE['regex'] . '#ius',
+            $this->_replacement,
+            $str
+        );
+
+        return $str;
+    }
+
 
 }

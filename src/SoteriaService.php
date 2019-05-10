@@ -2,36 +2,21 @@
 
 namespace devtoolboxuk\soteria;
 
-use devtoolboxuk\soteria\handlers\Handler;
+use devtoolboxuk\soteria\handlers\XssClean;
 
-class SoteriaService extends AbstractService implements SoteriaInterface
+
+class SoteriaService implements SoteriaInterface
 {
 
-    protected $handlers = [];
-    protected $references = [];
-
-    public function __call($method, $arguments = [])
+    public function xss_clean($string)
     {
-        $handlers = new Handler($arguments);
-        $handler = $handlers->build($method, $arguments);
-        $this->pushHandler($handler);
-        $this->processHandler();
-        return $this;
+        return $this->xssClean($string);
     }
 
-    public function getResult()
+    private function xssClean($string)
     {
-        $result = $this->process()->getResult();
-        $this->resetHandler();
-        return $result;
+        $xss = new XssClean();
+        return $xss->xss_clean($string);
     }
-
-
-    public function pushHandler($handler)
-    {
-        array_unshift($this->handlers, $handler);
-        return $this;
-    }
-
 
 }
