@@ -1,6 +1,6 @@
 <?php
 
-namespace devtoolboxuk\soteria\Resources;
+namespace devtoolboxuk\soteria\voku\Resources;
 
 class Utf8 extends Resources
 {

@@ -5,18 +5,30 @@ namespace devtoolboxuk\soteria;
 use devtoolboxuk\soteria\handlers\XssClean;
 
 
-class SoteriaService implements SoteriaInterface
+class SoteriaService //implements SoteriaInterface
 {
 
-    public function xss_clean($string)
+    protected $factory;
+
+    public function __call($method, $arguments)
     {
-        return $this->xssClean($string);
+        return $this->buildSecurity($method);
     }
 
-    private function xssClean($string)
+    public function buildSecurity($ruleSpec)
     {
-        $xss = new XssClean();
-        return $xss->xss_clean($string);
+        try {
+            return $this->getFactory()->build($ruleSpec);
+        } catch (\Exception $exception) {
+            throw new \Exception($exception);
+        }
     }
 
+    protected function getFactory()
+    {
+        if (!$this->factory instanceof SoteriaFactory) {
+            $this->factory = new SoteriaFactory();
+        }
+        return $this->factory;
+    }
 }

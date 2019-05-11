@@ -1,6 +1,6 @@
 <?php
 
-namespace devtoolboxuk\soteria\Resources;
+namespace devtoolboxuk\soteria\voku\Resources;
 
 use devtoolboxuk\soteria\handlers\XssClean;
 

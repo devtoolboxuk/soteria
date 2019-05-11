@@ -1,5 +1,7 @@
 <?php
-namespace devtoolboxuk\soteria\Resources;
+
+namespace devtoolboxuk\soteria\voku\Resources;
+
 class Exploded extends Resources
 {
     private $_exploded_words = [
@@ -15,7 +17,6 @@ class Exploded extends Resources
     {
         return $this->_exploded_words;
     }
-
 
     private function compactExplodedWordsCallback($matches)
     {
@@ -65,7 +66,7 @@ class Exploded extends Resources
             // That way valid stuff like "dealer to!" does not become "dealerto".
 
             $regex = '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(['#', '.'], ['\#', '\.'], $WORDS_CACHE['chunk'][$word]) . ')(?<after>[^\p{L}|@|.|!|?| ]|$)#ius';
-            $str = (string) \preg_replace_callback(
+            $str = (string)\preg_replace_callback(
                 $regex,
                 function ($matches) {
                     return $this->compactExplodedWordsCallback($matches);

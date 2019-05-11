@@ -2,35 +2,37 @@
 
 namespace devtoolboxuk\soteria\handlers;
 
-use devtoolboxuk\soteria\Resources\Attributes;
+use devtoolboxuk\soteria\voku\Resources\Attributes;
 
-use devtoolboxuk\soteria\Resources\EntitiesFallback;
-use devtoolboxuk\soteria\Resources\Evil;
-use devtoolboxuk\soteria\Resources\Exploded;
-use devtoolboxuk\soteria\Resources\Html;
-use devtoolboxuk\soteria\Resources\JavaScript;
-use devtoolboxuk\soteria\Resources\NeverAllowed;
+use devtoolboxuk\soteria\voku\Resources\Exploded;
+use devtoolboxuk\soteria\voku\Resources\Html;
+use devtoolboxuk\soteria\voku\Resources\JavaScript;
+use devtoolboxuk\soteria\voku\Resources\NeverAllowed;
 
-use devtoolboxuk\soteria\Resources\Utf7;
-use devtoolboxuk\soteria\Resources\Utf8;
-use devtoolboxuk\soteria\Resources\String;
+use devtoolboxuk\soteria\voku\Resources\Utf7;
+use devtoolboxuk\soteria\voku\Resources\Utf8;
+use devtoolboxuk\soteria\voku\Resources\String;
 
 
-class XssClean
+class Xss
 {
 
     private $_xss_found = null;
     private $neverAllowed;
-    private $evil;
     private $exploded;
-    private $decode;
     private $string;
+    private $attributes;
+    private $javascript;
+    private $html;
+    private $utf7;
+    private $utf8;
+    private $strings;
+
 
     function __construct()
     {
         $this->init();
     }
-
 
     function setString($str)
     {
@@ -67,7 +69,7 @@ class XssClean
             if (isset($matches['attr'])) {
                 foreach ($matches['attr'] as $matchInner) {
                     $tmpAntiXss = clone $this;
-                    $urlPartClean = $tmpAntiXss->xss_clean($matchInner);
+                    $urlPartClean = $tmpAntiXss->clean($matchInner);
 
                     if ($tmpAntiXss->isXssFound() === true) {
                         $this->_xss_found = true;
@@ -82,16 +84,10 @@ class XssClean
         return $str;
     }
 
-    public function result($string)
-    {
-        return $this->xss_clean($string); // RW Partly DONE
-
-    }
-
     function init()
     {
         $this->neverAllowed = new NeverAllowed();
-        $this->evil = new Evil();
+
         $this->exploded = new Exploded();
 
         $this->attributes = new Attributes();
@@ -107,7 +103,7 @@ class XssClean
     private function _get_data($file)
     {
         /** @noinspection PhpIncludeInspection */
-        return include __DIR__ . '/../Data/' . $file . '.php';
+        return include __DIR__ . '/../voku/Data/' . $file . '.php';
     }
 
     /**
@@ -188,7 +184,6 @@ class XssClean
 
         return $str;
     }
-
 
 
     /**
@@ -300,25 +295,14 @@ class XssClean
     }
 
     /**
-     * Filters tag attributes for consistency and safety.
-     *
-     * @param string $str
-     *
-     * @return string
-     */
-
-
-    /**
-     * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
-     *
-     * @return bool|null will return null if the "xss_clean()" wan't running at all
+     * @return null
      */
     public function isXssFound()
     {
         return $this->_xss_found;
     }
 
-    public function xss_clean($str)
+    public function clean($str)
     {
         // reset
         $this->_xss_found = null;
@@ -326,7 +310,7 @@ class XssClean
         // check for an array of strings
         if (\is_array($str)) {
             foreach ($str as $key => &$value) {
-                $str[$key] = $this->xss_clean($value);
+                $str[$key] = $this->clean($value);
             }
 
             return $str;
