@@ -3,7 +3,6 @@
 namespace devtoolboxuk\soteria\handlers;
 
 use devtoolboxuk\sanitiser\SanitiserService;
-use ReflectionClass;
 
 class Filter
 {
