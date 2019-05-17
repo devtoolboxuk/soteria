@@ -337,6 +337,12 @@ class Xss
             $str = $this->_do($str);
         } while ($old_str !== $str);
 
+        //URL Decode
+        do {
+            $decode_str = urldecode($str);
+            $str = $this->_do($str);
+        } while ($decode_str !== $str);
+
         // keep the old value, if there wasn't any XSS attack
         if ($this->_xss_found !== true) {
             $str = $old_str_backup;
