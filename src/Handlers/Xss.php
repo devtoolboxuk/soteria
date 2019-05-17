@@ -53,7 +53,7 @@ class Xss
                 $str
             );
         } else {
-                $str = $this->utf8->rawurldecode($str);
+            $str = $this->utf8->rawurldecode($str);
         }
 
         return $str;
@@ -315,6 +315,33 @@ class Xss
         return $this->_xss_found;
     }
 
+    private function urlDecode($str)
+    {
+        //URL Decode
+        do {
+            $decode_str = urldecode($str);
+            $str = $this->_do($str);
+        } while ($decode_str !== $str);
+
+        return $str;
+    }
+
+
+    private function process($str, $old_str_backup)
+    {
+        // process
+        do {
+            $old_str = $str;
+            $str = $this->_do($str);
+        } while ($old_str !== $str);
+
+        // keep the old value, if there wasn't any XSS attack
+        if ($this->_xss_found !== true) {
+            $str = $old_str_backup;
+        }
+        return $str;
+    }
+
     public function clean($str)
     {
         // reset
@@ -325,29 +352,12 @@ class Xss
             foreach ($str as $key => &$value) {
                 $str[$key] = $this->clean($value);
             }
-
             return $str;
         }
 
         $old_str_backup = $str;
 
-        // process
-        do {
-            $old_str = $str;
-            $str = $this->_do($str);
-        } while ($old_str !== $str);
-
-        //URL Decode
-        do {
-            $decode_str = urldecode($str);
-            $str = $this->_do($str);
-        } while ($decode_str !== $str);
-
-        // keep the old value, if there wasn't any XSS attack
-        if ($this->_xss_found !== true) {
-            $str = $old_str_backup;
-        }
-
-        return $str;
+        $str = $this->process($str, $old_str_backup);
+        return $this->urlDecode($str);
     }
 }
