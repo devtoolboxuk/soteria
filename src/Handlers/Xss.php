@@ -104,10 +104,10 @@ class Xss
 
     function isCompatible()
     {
-        if (version_compare(phpversion(), '5.5', '<')) {
-            return false;
+        if (version_compare(PHP_VERSION, '5.6.0') >= 0) {
+            return true;
         }
-        return true;
+        return false;
     }
 
 
