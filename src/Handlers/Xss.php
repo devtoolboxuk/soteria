@@ -53,7 +53,7 @@ class Xss
                 $str
             );
         } else {
-            $str = $this->utf8->rawurldecode($str);
+                $str = $this->utf8->rawurldecode($str);
         }
 
         return $str;
@@ -93,10 +93,21 @@ class Xss
         $this->attributes = new Attributes();
         $this->javascript = new JavaScript();
         $this->html = new Html();
-        $this->utf7 = new Utf7();
 
-        $this->utf8 = new Utf8();
+
+        if ($this->isCompatible()) {
+            $this->utf7 = new Utf7();
+            $this->utf8 = new Utf8();
+        }
         $this->strings = new String();
+    }
+
+    function isCompatible()
+    {
+        if (version_compare(phpversion(), '5.5', '<')) {
+            return false;
+        }
+        return true;
     }
 
 
@@ -132,25 +143,27 @@ class Xss
             return $str;
         }
 
-        // remove the BOM from UTF-8 / UTF-16 / UTF-32 strings
-        $str = $this->utf8->remove_bom($str);
+        if ($this->isCompatible()) {
+            // remove the BOM from UTF-8 / UTF-16 / UTF-32 strings
+            $str = $this->utf8->remove_bom($str);
 
-        // replace the diamond question mark (�) and invalid-UTF8 chars
-        $str = $this->utf8->replace_diamond_question_mark($str, '');
+            // replace the diamond question mark (�) and invalid-UTF8 chars
+            $str = $this->utf8->replace_diamond_question_mark($str, '');
 
-        // replace invisible characters with one single space
-        $str = $this->utf8->remove_invisible_characters($str, true, ' ');
+            // replace invisible characters with one single space
+            $str = $this->utf8->remove_invisible_characters($str, true, ' ');
 
-        $str = $this->utf8->normalize_whitespace($str);
+            $str = $this->utf8->normalize_whitespace($str);
 
-        $str = $this->strings->replace($str);
+            $str = $this->strings->replace($str);
 
-        // decode UTF-7 characters
-        $str = $this->utf7->repack($str);
+            // decode UTF-7 characters
+            $str = $this->utf7->repack($str);
 
-        // decode the string
-        $str = $this->decodeString($str); // RW Partly DONE
 
+            // decode the string
+            $str = $this->decodeString($str); // RW Partly DONE
+        }
         // backup the string (for later comparision)
         $str_backup = $str;
 
