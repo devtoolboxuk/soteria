@@ -15,6 +15,14 @@ class System
         return \defined('MB_OVERLOAD_STRING') && ((int)@\ini_get('mbstring.func_overload') & \MB_OVERLOAD_STRING);
     }
 
+    public function isPHPCompatible()
+    {
+        if (version_compare(PHP_VERSION, '5.6.0') >= 0) {
+            return true;
+        }
+        return false;
+    }
+
 
     public function iconv_loaded()
     {

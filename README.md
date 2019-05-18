@@ -1,5 +1,8 @@
 # soteria
 
+[![Build Status](https://api.travis-ci.org/devtoolboxuk/soteria.svg?branch=master)](https://travis-ci.org/devtoolboxuk/soteria)
+
+
 ## Table of Contents
 
 - [Background](#Background)
@@ -15,7 +18,7 @@ The XSS cleaner is a port from  https://github.com/voku/anti-xss with the abilit
 
 When I get around to upgrading my legacy systems, the XSS cleaner will be updated to use voku/anti-xss directly (because it's awesome)
 
-I've also added a URL decoder, as I found some items causing a few issues
+I've also added a URL decoder, as I found some items causing a few issues with invisible characters such as \r\n (in a URL, you probably wouldn't want this)
 
 ## Usage
 

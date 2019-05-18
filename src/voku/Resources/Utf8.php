@@ -7,16 +7,12 @@ class Utf8 extends Resources
 
     private $system;
 
-    private $compatible = true;
-
     /**
      * Utf8 constructor.
      * @param bool $phpCompatible
      */
     function __construct($phpCompatible = true)
     {
-
-        $this->compatible = $phpCompatible;
 
         $this->system = new System();
 
@@ -149,6 +145,9 @@ class Utf8 extends Resources
     {
         if (!isset($this->SUPPORT['already_checked_via_portable_utf8'])) {
             $this->SUPPORT['already_checked_via_portable_utf8'] = true;
+
+
+            $this->SUPPORT['phpCompatible'] = $this->system->isPHPCompatible();
 
             // http://php.net/manual/en/book.mbstring.php
             $this->SUPPORT['mbstring'] = $this->system->mbstring_loaded();
@@ -739,7 +738,7 @@ class Utf8 extends Resources
 
     public function to_utf8($str, $decodeHtmlEntityToUtf8 = false)
     {
-        if ($this->compatible) {
+        if ($this->SUPPORT['phpCompatible'] === true) {
             if (\is_array($str) === true) {
                 foreach ($str as $k => &$v) {
                     $v = $this->to_utf8($v, $decodeHtmlEntityToUtf8);
@@ -987,7 +986,7 @@ class Utf8 extends Resources
         if ($length <= 0) {
             return [];
         }
-        if ($this->compatible) {
+        if ($this->SUPPORT['phpCompatible'] === true) {
             if (\is_array($str) === true) {
                 foreach ($str as $k => &$v) {
                     $v = $this->str_split(
@@ -1364,8 +1363,7 @@ class Utf8 extends Resources
 
         $maybeUTF16LE = 0;
         $test = \mb_convert_encoding($str, 'UTF-8', 'UTF-16LE');
-        if ($test && $this->compatible) {
-            echo "(x)";
+        if ($test && $this->SUPPORT['phpCompatible'] === true) {
             $test2 = \mb_convert_encoding($test, 'UTF-16LE', 'UTF-8');
             $test3 = \mb_convert_encoding($test2, 'UTF-8', 'UTF-16LE');
             if ($test3 === $test) {
@@ -1383,7 +1381,7 @@ class Utf8 extends Resources
 
         $maybeUTF16BE = 0;
         $test = \mb_convert_encoding($str, 'UTF-8', 'UTF-16BE');
-        if ($test  && $this->compatible) {
+        if ($test  && $this->SUPPORT['phpCompatible'] === true) {
             $test2 = \mb_convert_encoding($test, 'UTF-16BE', 'UTF-8');
             $test3 = \mb_convert_encoding($test2, 'UTF-8', 'UTF-16BE');
             if ($test3 === $test) {

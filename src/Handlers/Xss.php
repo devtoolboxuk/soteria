@@ -9,6 +9,7 @@ use devtoolboxuk\soteria\voku\Resources\Html;
 use devtoolboxuk\soteria\voku\Resources\JavaScript;
 use devtoolboxuk\soteria\voku\Resources\NeverAllowed;
 
+use devtoolboxuk\soteria\voku\Resources\System;
 use devtoolboxuk\soteria\voku\Resources\Utf7;
 use devtoolboxuk\soteria\voku\Resources\Utf8;
 use devtoolboxuk\soteria\voku\Resources\StringResource;
@@ -27,6 +28,7 @@ class Xss
     private $utf7;
     private $utf8;
     private $strings;
+    private $system;
 
 
     function __construct()
@@ -44,20 +46,15 @@ class Xss
         $this->javascript = new JavaScript();
         $this->html = new Html();
 
+        $this->system = new System();
 
        $this->utf7 = new Utf7();
-       $this->utf8 = new Utf8($this->isCompatible());
+       $this->utf8 = new Utf8();
 
         $this->strings = new StringResource();
     }
 
-    public function isCompatible()
-    {
-        if (version_compare(PHP_VERSION, '5.6.0') >= 0) {
-            return true;
-        }
-        return false;
-    }
+
 
     function setString($str)
     {
@@ -90,6 +87,12 @@ class Xss
 
         return $str;
     }
+
+    public function isCompatible()
+    {
+        return $this->system->isPHPCompatible();
+    }
+
 
     /**
      * @param StringResource $str
@@ -230,7 +233,7 @@ class Xss
         // reset
         $this->_xss_found = null;
 
-        if ($this->isCompatible()) {
+        if ($this->system->isPHPCompatible()) {
             // check for an array of strings
             if (\is_array($str)) {
                 foreach ($str as $key => &$value) {
@@ -257,7 +260,7 @@ class Xss
             return $str;
         }
 
-        if ($this->isCompatible()) {
+        if ($this->system->isPHPCompatible()) {
             if (\is_array($str)) {
                 foreach ($str as $key => &$value) {
                     $str[$key] = $this->cleanUrl($value);
