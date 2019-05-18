@@ -46,9 +46,8 @@ class Xss
 
 
        $this->utf7 = new Utf7();
-      //  if ($this->isCompatible()) {
-            $this->utf8 = new Utf8();
-       // }
+       $this->utf8 = new Utf8($this->isCompatible());
+
         $this->strings = new StringResource();
     }
 
