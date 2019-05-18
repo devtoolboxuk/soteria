@@ -13,7 +13,7 @@ class FilterTest extends TestCase
     {
         parent::__construct($name, $data, $dataName);
         $this->security = new SoteriaService();
-        echo "PHP: ".phpversion()."\n";
+
         $this->filter = $this->security->filter();
     }
 

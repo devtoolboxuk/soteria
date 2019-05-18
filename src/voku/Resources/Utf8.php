@@ -1363,6 +1363,8 @@ class Utf8 extends Resources
                 if (\count($strChars) === 0) {
                     $strChars = $this->count_chars($str, true, false);
                 }
+                echo "\n".phpversion();
+                echo $this->SUPPORT['phpCompatible'];
                 foreach ($this->count_chars($test3) as $test3char => &$test3charEmpty) {
                     if (\in_array($test3char, $strChars, true) === true) {
                         ++$maybeUTF16LE;

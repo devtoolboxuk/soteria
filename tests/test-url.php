@@ -12,7 +12,6 @@ class UrlTest extends TestCase
     {
         parent::__construct($name, $data, $dataName);
         $this->security = new SoteriaService();
-        echo "PHP: ".phpversion()."\n";
     }
 
     private function _testArray()
