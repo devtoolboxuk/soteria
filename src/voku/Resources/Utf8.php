@@ -730,12 +730,13 @@ class Utf8 extends Resources
 
     public function to_utf8($str, $decodeHtmlEntityToUtf8 = false)
     {
-        if (\is_array($str) === true) {
-            foreach ($str as $k => &$v) {
-                $v = $this->to_utf8($v, $decodeHtmlEntityToUtf8);
+        if ($this->isCompatible()) {
+            if (\is_array($str) === true) {
+                foreach ($str as $k => &$v) {
+                    $v = $this->to_utf8($v, $decodeHtmlEntityToUtf8);
+                }
+                return $str;
             }
-
-            return $str;
         }
 
         $str = (string)$str;
@@ -977,18 +978,19 @@ class Utf8 extends Resources
         if ($length <= 0) {
             return [];
         }
+        if ($this->isCompatible()) {
+            if (\is_array($str) === true) {
+                foreach ($str as $k => &$v) {
+                    $v = $this->str_split(
+                        $v,
+                        $length,
+                        $cleanUtf8,
+                        $tryToUseMbFunction
+                    );
+                }
 
-        if (\is_array($str) === true) {
-            foreach ($str as $k => &$v) {
-                $v = $this->str_split(
-                    $v,
-                    $length,
-                    $cleanUtf8,
-                    $tryToUseMbFunction
-                );
+                return $str;
             }
-
-            return $str;
         }
 
         // init
@@ -1339,10 +1341,6 @@ class Utf8 extends Resources
     public function is_utf16($str, $checkIfStringIsBinary = true)
     {
 
-        if (!$this->isCompatible()) {
-            return false;
-        }
-
             // init
         $str = (string) $str;
         $strChars = [];
@@ -1361,9 +1359,11 @@ class Utf8 extends Resources
 
         $str = $this->remove_bom($str);
 
+
+
         $maybeUTF16LE = 0;
         $test = \mb_convert_encoding($str, 'UTF-8', 'UTF-16LE');
-        if ($test) {
+        if ($test && $this->isCompatible()) {
             $test2 = \mb_convert_encoding($test, 'UTF-16LE', 'UTF-8');
             $test3 = \mb_convert_encoding($test2, 'UTF-8', 'UTF-16LE');
             if ($test3 === $test) {
@@ -1381,7 +1381,7 @@ class Utf8 extends Resources
 
         $maybeUTF16BE = 0;
         $test = \mb_convert_encoding($str, 'UTF-8', 'UTF-16BE');
-        if ($test) {
+        if ($test  && $this->isCompatible()) {
             $test2 = \mb_convert_encoding($test, 'UTF-16BE', 'UTF-8');
             $test3 = \mb_convert_encoding($test2, 'UTF-8', 'UTF-16BE');
             if ($test3 === $test) {
@@ -1407,7 +1407,7 @@ class Utf8 extends Resources
 
         return false;
     }
-    
+
     public function str_detect_encoding($str)
     {
         // init

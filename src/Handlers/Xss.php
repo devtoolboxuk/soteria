@@ -120,14 +120,14 @@ class Xss
 
 
         // remove the BOM from UTF-8 / UTF-16 / UTF-32 strings
-        if ($this->isCompatible()) $str = $this->utf8->remove_bom($str);
+        $str = $this->utf8->remove_bom($str);
 
         // replace the diamond question mark (�) and invalid-UTF8 chars
-        if ($this->isCompatible()) {
+      //  if ($this->isCompatible()) {
             $str = $this->utf8->replace_diamond_question_mark($str, '');
-        } else {
-            $str = $this->utf8->replace_diamond_question_mark($str, '',false);
-        }
+      //  } else {
+      //      $str = $this->utf8->replace_diamond_question_mark($str, '',false);
+      //  }
 
         // replace invisible characters with one single space
         $str = $this->utf8->remove_invisible_characters($str, true, ' ');
