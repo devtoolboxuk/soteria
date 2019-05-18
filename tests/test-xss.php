@@ -101,6 +101,9 @@ class XssTest extends TestCase
 
     function testArray()
     {
+
+
+
         $xss = $this->security->xss();
         if (!$xss->isCompatible()) {
             $this->markTestSkipped('Arrays not supported for PHP 5.4');

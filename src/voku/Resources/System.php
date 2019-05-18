@@ -17,6 +17,10 @@ class System
 
     public function isPHPCompatible()
     {
+        if (in_array(phpversion(),['5.4.16','5.4.45'])) {
+            return false;
+        }
+
         if (version_compare(PHP_VERSION, '5.6.0') >= 0) {
             return true;
         }

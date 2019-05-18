@@ -7,17 +7,10 @@ class Utf8 extends Resources
 
     private $system;
 
-    /**
-     * Utf8 constructor.
-     * @param bool $phpCompatible
-     */
-    function __construct($phpCompatible = true)
+    function __construct()
     {
-
         $this->system = new System();
-
         $this->checkForSupport();
-
     }
 
 
