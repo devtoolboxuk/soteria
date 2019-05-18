@@ -1328,9 +1328,22 @@ class Utf8 extends Resources
         );
     }
 
+    private function isCompatible()
+    {
+        if (version_compare(PHP_VERSION, '5.6.0') >= 0) {
+            return true;
+        }
+        return false;
+    }
+
     public function is_utf16($str, $checkIfStringIsBinary = true)
     {
-        // init
+
+        if (!$this->isCompatible()) {
+            return false;
+        }
+
+            // init
         $str = (string) $str;
         $strChars = [];
 
