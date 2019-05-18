@@ -483,14 +483,14 @@ class Utf8 extends Resources
 
     public function to_utf8($str, $decodeHtmlEntityToUtf8 = false)
     {
-        if ($this->SUPPORT['phpCompatible'] === true) {
+
             if (\is_array($str) === true) {
                 foreach ($str as $k => &$v) {
                     $v = $this->to_utf8($v, $decodeHtmlEntityToUtf8);
                 }
                 return $str;
             }
-        }
+
 
         $str = (string)$str;
         if ($str === '') {
@@ -1091,7 +1091,7 @@ class Utf8 extends Resources
         if ($length <= 0) {
             return [];
         }
-        if ($this->SUPPORT['phpCompatible'] === true) {
+
             if (\is_array($str) === true) {
                 foreach ($str as $k => &$v) {
                     $v = $this->str_split(
@@ -1104,7 +1104,6 @@ class Utf8 extends Resources
 
                 return $str;
             }
-        }
 
         // init
         $str = (string)$str;
