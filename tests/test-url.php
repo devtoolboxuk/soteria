@@ -86,21 +86,29 @@ class UrlTest extends TestCase
 
     function testIsXssFoundArray()
     {
+        $xss = $this->security->xss();
+        if (!$xss->isCompatible()) {
+            $this->markTestSkipped('Arrays not supported for PHP 5.4');
+        }
         $testArray = $this->_testArray();
         $result = $this->_resultIsFoundArray();
-        $xss = $this->security->xss();
+
         foreach ($testArray as $key => $string) {
-            $xss->clean($string);
+            $xss->cleanUrl($string);
             $this->assertSame($xss->isXssFound(), $result[$key]);
         }
     }
 
     function testArray()
     {
+        $xss = $this->security->xss();
+        if (!$xss->isCompatible()) {
+            $this->markTestSkipped('Arrays not supported for PHP 5.4');
+        }
         $testArray = $this->_testArray();
         $resultArray = $this->_resultArray();
 
-        $this->assertSame($resultArray, $this->security->xss()->cleanUrl($testArray));
+        $this->assertSame($resultArray, $xss->cleanUrl($testArray));
     }
 
     public function testFromJsXss()

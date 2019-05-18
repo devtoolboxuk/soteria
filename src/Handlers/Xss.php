@@ -34,56 +34,6 @@ class Xss
         $this->init();
     }
 
-    function setString($str)
-    {
-        $this->string = $str;
-    }
-
-    public function decodeString($str)
-    {
-        // init
-        $regExForHtmlTags = '/<\p{L}+.*+/us';
-
-        if (\strpos($str, '<') !== false && \preg_match($regExForHtmlTags, $str, $matches) === 1) {
-            $str = (string)\preg_replace_callback(
-                $regExForHtmlTags,
-                function ($matches) {
-                    return $this->decodeEntity($matches);
-                },
-                $str
-            );
-        } else {
-            $str = $this->utf8->rawurldecode($str);
-        }
-
-        return $str;
-    }
-
-    private function decodeEntity(array $match)
-    {
-        // init
-        $str = $match[0];
-
-        // protect GET variables without XSS in URLs
-        if (\preg_match_all("/[\?|&]?[\\p{L}0-9_\-\[\]]+\s*=\s*(?<wrapped>\"|\042|'|\047)(?<attr>[^\\1]*?)\\g{wrapped}/ui", $str, $matches)) {
-            if (isset($matches['attr'])) {
-                foreach ($matches['attr'] as $matchInner) {
-                    $tmpAntiXss = clone $this;
-                    $urlPartClean = $tmpAntiXss->clean($matchInner);
-
-                    if ($tmpAntiXss->isXssFound() === true) {
-                        $this->_xss_found = true;
-                        $str = \str_replace($matchInner, $this->utf8->rawurldecode($urlPartClean), $str);
-                    }
-                }
-            }
-        } else {
-            $str = $this->_entity_decode($this->utf8->rawurldecode($str));
-        }
-
-        return $str;
-    }
-
     function init()
     {
         $this->neverAllowed = new NeverAllowed();
@@ -102,7 +52,7 @@ class Xss
         $this->strings = new StringResource();
     }
 
-    function isCompatible()
+    public function isCompatible()
     {
         if (version_compare(PHP_VERSION, '5.6.0') >= 0) {
             return true;
@@ -110,11 +60,36 @@ class Xss
         return false;
     }
 
-
-    private function _get_data($file)
+    function setString($str)
     {
-        /** @noinspection PhpIncludeInspection */
-        return include __DIR__ . '/../voku/Data/' . $file . '.php';
+        $this->string = $str;
+    }
+
+    public function cleanArray($array)
+    {
+        return $this->clean($array);
+    }
+
+    public function cleanString($str)
+    {
+        return $this->clean($str);
+    }
+
+    private function process($str, $old_str_backup)
+    {
+
+        // process
+        do {
+            $old_str = $str;
+            $str = $this->_do($str);
+        } while ($old_str !== $str);
+
+        // keep the old value, if there wasn't any XSS attack
+        if ($this->_xss_found !== true) {
+            $str = $old_str_backup;
+        }
+
+        return $str;
     }
 
     /**
@@ -198,6 +173,111 @@ class Xss
         return $str;
     }
 
+    public function decodeString($str)
+    {
+        // init
+        $regExForHtmlTags = '/<\p{L}+.*+/us';
+
+        if (\strpos($str, '<') !== false && \preg_match($regExForHtmlTags, $str, $matches) === 1) {
+            $str = (string)\preg_replace_callback(
+                $regExForHtmlTags,
+                function ($matches) {
+                    return $this->decodeEntity($matches);
+                },
+                $str
+            );
+        } else {
+            $str = $this->utf8->rawurldecode($str);
+        }
+
+        return $str;
+    }
+
+    private function decodeEntity(array $match)
+    {
+        // init
+        $str = $match[0];
+
+        // protect GET variables without XSS in URLs
+        if (\preg_match_all("/[\?|&]?[\\p{L}0-9_\-\[\]]+\s*=\s*(?<wrapped>\"|\042|'|\047)(?<attr>[^\\1]*?)\\g{wrapped}/ui", $str, $matches)) {
+            if (isset($matches['attr'])) {
+                foreach ($matches['attr'] as $matchInner) {
+                    $tmpAntiXss = clone $this;
+                    $urlPartClean = $tmpAntiXss->clean($matchInner);
+
+                    if ($tmpAntiXss->isXssFound() === true) {
+                        $this->_xss_found = true;
+                        $str = \str_replace($matchInner, $this->utf8->rawurldecode($urlPartClean), $str);
+                    }
+                }
+            }
+        } else {
+            $str = $this->_entity_decode($this->utf8->rawurldecode($str));
+        }
+
+        return $str;
+    }
+
+    /**
+     * @param $str
+     * @return array|mixed
+     */
+    public function clean($str)
+    {
+        // reset
+        $this->_xss_found = null;
+
+        if ($this->isCompatible()) {
+            // check for an array of strings
+            if (\is_array($str)) {
+                foreach ($str as $key => &$value) {
+                    $str[$key] = $this->clean($value);
+                }
+                return $str;
+            }
+        }
+
+        $old_str_backup = $str;
+
+        return $this->process($str, $old_str_backup);
+    }
+
+    /**
+     * @param $str
+     * @return array|mixed
+     */
+    public function cleanUrl($str)
+    {
+        $str = $this->clean($str);
+
+        if (is_numeric($str) || is_null($str)) {
+            return $str;
+        }
+
+        if ($this->isCompatible()) {
+            if (\is_array($str)) {
+                foreach ($str as $key => &$value) {
+                    $str[$key] = $this->cleanUrl($value);
+                }
+                return $str;
+            }
+        }
+
+        do {
+            $decode_str = rawurldecode($str);
+            $str = $this->_do($str);
+        } while ($decode_str !== $str);
+
+        return $str;
+    }
+
+    /**
+     * @return null
+     */
+    public function isXssFound()
+    {
+        return $this->_xss_found;
+    }
 
     /**
      * Entity-decoding.
@@ -307,80 +387,9 @@ class Xss
         return $str;
     }
 
-    /**
-     * @return null
-     */
-    public function isXssFound()
+    private function _get_data($file)
     {
-        return $this->_xss_found;
-    }
-
-    private function process($str, $old_str_backup)
-    {
-
-        // process
-        do {
-            $old_str = $str;
-            $str = $this->_do($str);
-        } while ($old_str !== $str);
-
-        // keep the old value, if there wasn't any XSS attack
-        if ($this->_xss_found !== true) {
-            $str = $old_str_backup;
-        }
-
-        return $str;
-    }
-
-
-    public function cleanArray($array)
-    {
-        return $this->clean($array);
-    }
-
-    public function cleanString($str)
-    {
-        return $this->clean($str);
-    }
-
-    public function clean($str)
-    {
-        // reset
-        $this->_xss_found = null;
-
-        // check for an array of strings
-        if (\is_array($str)) {
-            foreach ($str as $key => &$value) {
-                $str[$key] = $this->clean($value);
-            }
-            return $str;
-        }
-
-        $old_str_backup = $str;
-
-        return $this->process($str, $old_str_backup);
-    }
-
-    public function cleanUrl($str)
-    {
-        $str = $this->clean($str);
-
-        if (is_numeric($str) || is_null($str)) {
-            return $str;
-        }
-
-        if (\is_array($str)) {
-            foreach ($str as $key => &$value) {
-                $str[$key] = $this->cleanUrl($value);
-            }
-            return $str;
-        }
-
-        do {
-            $decode_str = rawurldecode($str);
-            $str = $this->_do($str);
-        } while ($decode_str !== $str);
-
-        return $str;
+        /** @noinspection PhpIncludeInspection */
+        return include __DIR__ . '/../voku/Data/' . $file . '.php';
     }
 }

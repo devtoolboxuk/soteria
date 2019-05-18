@@ -86,9 +86,13 @@ class XssTest extends TestCase
 
     function testIsXssFoundArray()
     {
+        $xss = $this->security->xss();
+        if (!$xss->isCompatible()) {
+            $this->markTestSkipped('Arrays not supported for PHP 5.4');
+        }
         $testArray = $this->_testArray();
         $result = $this->_resultIsFoundArray();
-        $xss = $this->security->xss();
+
         foreach ($testArray as $key => $string) {
             $xss->clean($string);
             $this->assertSame($xss->isXssFound(), $result[$key]);
@@ -97,10 +101,14 @@ class XssTest extends TestCase
 
     function testArray()
     {
+        $xss = $this->security->xss();
+        if (!$xss->isCompatible()) {
+            $this->markTestSkipped('Arrays not supported for PHP 5.4');
+        }
         $testArray = $this->_testArray();
         $resultArray = $this->_resultArray();
 
-        $this->assertSame($resultArray, $this->security->xss()->clean($testArray));
+        $this->assertSame($resultArray, $xss->clean($testArray));
     }
 
     public function testFromJsXss()
