@@ -45,10 +45,10 @@ class Xss
         $this->html = new Html();
 
 
-        if ($this->isCompatible()) {
+ //       if ($this->isCompatible()) {
             $this->utf7 = new Utf7();
             $this->utf8 = new Utf8();
-        }
+  //      }
         $this->strings = new StringResource();
     }
 
