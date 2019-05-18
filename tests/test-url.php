@@ -119,7 +119,9 @@ class UrlTest extends TestCase
         $this->assertSame(123, $this->security->xss()->cleanUrl(123));
         $this->assertSame('{a: 1111}', $this->security->xss()->cleanUrl('{a: 1111}'));
         // 清除不可见字符
-        $this->assertSame("a  b", $this->security->xss()->cleanUrl("a\u0000\u0001\u0002\u0003\r\n b"));
+        if (!$this->security->xss()->isCompatible()) {
+            $this->assertSame("a  b", $this->security->xss()->cleanUrl("a\u0000\u0001\u0002\u0003\r\n b"));
+        }
         // 过滤不在白名单的标签
         $this->assertSame('<b>abcd</b>', $this->security->xss()->cleanUrl('<b>abcd</b>'));
         $this->assertSame('<o>abcd</o>', $this->security->xss()->cleanUrl('<o>abcd</o>'));
