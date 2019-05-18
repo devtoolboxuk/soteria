@@ -2,7 +2,7 @@
 
 namespace devtoolboxuk\soteria\voku\Resources;
 
-class String extends Resources
+class StringResource extends Resources
 {
 
     public function replace($string)

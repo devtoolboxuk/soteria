@@ -11,7 +11,7 @@ use devtoolboxuk\soteria\voku\Resources\NeverAllowed;
 
 use devtoolboxuk\soteria\voku\Resources\Utf7;
 use devtoolboxuk\soteria\voku\Resources\Utf8;
-use devtoolboxuk\soteria\voku\Resources\String;
+use devtoolboxuk\soteria\voku\Resources\StringResource;
 
 
 class Xss
@@ -99,7 +99,7 @@ class Xss
             $this->utf7 = new Utf7();
             $this->utf8 = new Utf8();
         }
-        $this->strings = new String();
+        $this->strings = new StringResource();
     }
 
     function isCompatible()
@@ -118,7 +118,7 @@ class Xss
     }
 
     /**
-     * @param string $str
+     * @param StringResource $str
      *
      * @return mixed
      */
@@ -202,9 +202,9 @@ class Xss
     /**
      * Entity-decoding.
      *
-     * @param string $str
+     * @param StringResource $str
      *
-     * @return string
+     * @return StringResource
      */
     private function _entity_decode($str)
     {
@@ -315,20 +315,9 @@ class Xss
         return $this->_xss_found;
     }
 
-    private function urlDecode($str)
-    {
-        //URL Decode
-        do {
-            $decode_str = urldecode($str);
-            $str = $this->_do($str);
-        } while ($decode_str !== $str);
-
-        return $str;
-    }
-
-
     private function process($str, $old_str_backup)
     {
+
         // process
         do {
             $old_str = $str;
@@ -339,7 +328,19 @@ class Xss
         if ($this->_xss_found !== true) {
             $str = $old_str_backup;
         }
+
         return $str;
+    }
+
+
+    public function cleanArray($array)
+    {
+        return $this->clean($array);
+    }
+
+    public function cleanString($str)
+    {
+        return $this->clean($str);
     }
 
     public function clean($str)
@@ -357,7 +358,29 @@ class Xss
 
         $old_str_backup = $str;
 
-        $str = $this->process($str, $old_str_backup);
-        return $this->urlDecode($str);
+        return $this->process($str, $old_str_backup);
+    }
+
+    public function cleanUrl($str)
+    {
+        $str = $this->clean($str);
+
+        if (is_numeric($str) || is_null($str)) {
+            return $str;
+        }
+
+        if (\is_array($str)) {
+            foreach ($str as $key => &$value) {
+                $str[$key] = $this->cleanUrl($value);
+            }
+            return $str;
+        }
+
+        do {
+            $decode_str = rawurldecode($str);
+            $str = $this->_do($str);
+        } while ($decode_str !== $str);
+
+        return $str;
     }
 }

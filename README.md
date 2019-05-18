@@ -15,9 +15,9 @@ The XSS cleaner is a port from  https://github.com/voku/anti-xss with the abilit
 
 When I get around to upgrading my legacy systems, the XSS cleaner will be updated to use voku/anti-xss directly (because it's awesome)
 
-## Usage
+I've also added a URL decoder, as I found some items causing a few issues
 
-Usage of the hashing service
+## Usage
 
 ```sh
 $ composer require devtoolboxuk/soteria
@@ -42,13 +42,32 @@ $xss = $this->security->xss();
 ```
 
 #### XSS Clean
+
+Great for clearing out data in posted data
+
  ```php
-$xss->clean($string); //Outputs data that has had XSS data removed.
+#$data can be either a string or an array
+$xss->clean($data); //Outputs data that has had XSS data removed.
 ```
 
 #### XSS Detected
 ```php
-$xss->clean($string);
+$xss->clean($data);
+$xss->isXssFound(); //Returns true / false
+```
+
+#### XSS Clean a URL
+
+Great for clearing out crappy URLs (does the same as clean, but also removes invisible characters like \r \n)
+
+```php
+#$data can be either a string or an array
+$xss->cleanUrl($data); //Outputs data that has had XSS data removed.
+```
+
+#### XSS Detected
+```php
+$xss->cleanUrl($data);
 $xss->isXssFound(); //Returns true / false
 ```
 
