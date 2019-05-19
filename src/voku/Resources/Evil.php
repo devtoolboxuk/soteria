@@ -1,6 +1,7 @@
 <?php
 
 namespace devtoolboxuk\soteria\voku\Resources;
+
 class Evil extends Resources
 {
 
@@ -66,6 +67,4 @@ class Evil extends Resources
     {
         return $this->_evil_html_tags;
     }
-
-
 }

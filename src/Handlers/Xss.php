@@ -114,13 +114,7 @@ class Xss
         $str = (string)$str;
         $strInt = (int)$str;
         $strFloat = (float)$str;
-        if (
-            !$str
-            ||
-            (string)$strInt === $str
-            ||
-            (string)$strFloat === $str
-        ) {
+        if (!$str || (string)$strInt === $str || (string)$strFloat === $str) {
 
             // no xss found
             if ($this->_xss_found !== true) {
@@ -134,11 +128,7 @@ class Xss
         $str = $this->utf8->remove_bom($str);
 
         // replace the diamond question mark (�) and invalid-UTF8 chars
-        //  if ($this->isCompatible()) {
         $str = $this->utf8->replace_diamond_question_mark($str, '');
-        //  } else {
-        //      $str = $this->utf8->replace_diamond_question_mark($str, '',false);
-        //  }
 
         // replace invisible characters with one single space
         $str = $this->utf8->remove_invisible_characters($str, true, ' ');
@@ -148,7 +138,6 @@ class Xss
 
         // decode UTF-7 characters
         $str = $this->utf7->repack($str);
-
 
         // decode the string
         $str = $this->decodeString($str); // RW Partly DONE
@@ -192,8 +181,8 @@ class Xss
         // init
         $regExForHtmlTags = '/<\p{L}+.*+/us';
 
-        if (\strpos($str, '<') !== false && \preg_match($regExForHtmlTags, $str, $matches) === 1) {
-            $str = (string)\preg_replace_callback(
+        if (strpos($str, '<') !== false && preg_match($regExForHtmlTags, $str, $matches) === 1) {
+            $str = (string)preg_replace_callback(
                 $regExForHtmlTags,
                 function ($matches) {
                     return $this->decodeEntity($matches);
@@ -213,7 +202,7 @@ class Xss
         $str = $match[0];
 
         // protect GET variables without XSS in URLs
-        if (\preg_match_all("/[\?|&]?[\\p{L}0-9_\-\[\]]+\s*=\s*(?<wrapped>\"|\042|'|\047)(?<attr>[^\\1]*?)\\g{wrapped}/ui", $str, $matches)) {
+        if (preg_match_all("/[\?|&]?[\\p{L}0-9_\-\[\]]+\s*=\s*(?<wrapped>\"|\042|'|\047)(?<attr>[^\\1]*?)\\g{wrapped}/ui", $str, $matches)) {
             if (isset($matches['attr'])) {
                 foreach ($matches['attr'] as $matchInner) {
                     $tmpAntiXss = clone $this;
@@ -258,7 +247,7 @@ class Xss
 
 
         // decode-again, for e.g. HHVM or miss configured applications ...
-        if (\preg_match_all('/(?<html_entity>&[A-Za-z]{2,}[;]{0})/', $str, $matches)) {
+        if (preg_match_all('/(?<html_entity>&[A-Za-z]{2,}[;]{0})/', $str, $matches)) {
             if ($HTML_ENTITIES_CACHE === null) {
 
                 // links:
@@ -371,7 +360,7 @@ class Xss
             return $str;
         }
 
-        if (\is_array($str)) {
+        if (is_array($str)) {
             foreach ($str as $key => $value) {
                 $str[$key] = $this->cleanUrl($value);
             }

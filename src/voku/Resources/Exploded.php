@@ -13,20 +13,6 @@ class Exploded extends Resources
         'eval',
     ];
 
-    private function words()
-    {
-        return $this->_exploded_words;
-    }
-
-    private function compactExplodedWordsCallback($matches)
-    {
-        return $matches['before'] . \preg_replace(
-                '/' . $this->_spacing_regex . '/is',
-                '',
-                $matches['word']
-            ) . $matches['after'];
-    }
-
     public function compactExplodedString($str)
     {
         static $WORDS_CACHE;
@@ -34,7 +20,7 @@ class Exploded extends Resources
         $WORDS_CACHE['split'] = [];
 
         // check if we need to perform the regex-stuff
-        if (\strlen($str) <= 30) {
+        if (strlen($str) <= 30) {
             $useStrPos = true;
         } else {
             $useStrPos = false;
@@ -43,18 +29,18 @@ class Exploded extends Resources
         foreach ($this->words() as $word) {
             if (!isset($WORDS_CACHE['chunk'][$word])) {
                 $regex = $this->_spacing_regex;
-                $WORDS_CACHE['chunk'][$word] = \substr(
-                    \chunk_split($word, 1, $regex),
+                $WORDS_CACHE['chunk'][$word] = substr(
+                    chunk_split($word, 1, $regex),
                     0,
-                    -\strlen($regex)
+                    -strlen($regex)
                 );
 
-                $WORDS_CACHE['split'][$word] = \str_split($word, 1);
+                $WORDS_CACHE['split'][$word] = str_split($word, 1);
             }
 
             if ($useStrPos) {
                 foreach ($WORDS_CACHE['split'][$word] as $charTmp) {
-                    if (\stripos($str, $charTmp) === false) {
+                    if (stripos($str, $charTmp) === false) {
                         continue 2;
                     }
                 }
@@ -65,8 +51,8 @@ class Exploded extends Resources
             //
             // That way valid stuff like "dealer to!" does not become "dealerto".
 
-            $regex = '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(['#', '.'], ['\#', '\.'], $WORDS_CACHE['chunk'][$word]) . ')(?<after>[^\p{L}|@|.|!|?| ]|$)#ius';
-            $str = (string)\preg_replace_callback(
+            $regex = '#(?<before>[^\p{L}]|^)(?<word>' . str_replace(['#', '.'], ['\#', '\.'], $WORDS_CACHE['chunk'][$word]) . ')(?<after>[^\p{L}|@|.|!|?| ]|$)#ius';
+            $str = (string)preg_replace_callback(
                 $regex,
                 function ($matches) {
                     return $this->compactExplodedWordsCallback($matches);
@@ -78,5 +64,13 @@ class Exploded extends Resources
         return $str;
     }
 
+    private function words()
+    {
+        return $this->_exploded_words;
+    }
 
+    private function compactExplodedWordsCallback($matches)
+    {
+        return $matches['before'] . preg_replace('/' . $this->_spacing_regex . '/is', '', $matches['word']) . $matches['after'];
+    }
 }

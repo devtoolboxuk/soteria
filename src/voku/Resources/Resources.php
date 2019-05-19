@@ -25,7 +25,7 @@ class Resources
         }
 
         $out = '';
-        if (\preg_match_all('#\s*[\\p{L}0-9_\-\[\]]+\s*=\s*("|\042|\'|\047)(?:[^\\1]*?)\\1#ui', $str, $matches)) {
+        if (preg_match_all('#\s*[\\p{L}0-9_\-\[\]]+\s*=\s*("|\042|\'|\047)(?:[^\\1]*?)\\1#ui', $str, $matches)) {
             foreach ($matches[0] as $match) {
                 $out .= $match;
             }

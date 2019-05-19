@@ -14,6 +14,21 @@ class XssTest extends TestCase
         $this->security = new SoteriaService();
     }
 
+    function testIsXssFoundArray()
+    {
+        $xss = $this->security->xss();
+//        if (!$xss->isCompatible()) {
+//            $this->markTestSkipped('Arrays not supported for PHP 5.4');
+//        }
+        $testArray = $this->_testArray();
+        $result = $this->_resultIsFoundArray();
+
+        foreach ($testArray as $key => $string) {
+            $xss->clean($string);
+            $this->assertSame($xss->isXssFound(), $result[$key]);
+        }
+    }
+
     private function _testArray()
     {
         return [
@@ -34,29 +49,6 @@ class XssTest extends TestCase
             '<td width="200">Long Cell</td>',
             'search.php?q=%22%3Balert(%22XSS%22)%3B&n=1093&i=410',
             'http://localhost/text.php/"><script>alert(“Gehackt!”);</script></form><form action="/...',
-        ];
-    }
-
-    private function _resultArray()
-    {
-        return [
-            '<a href="http://www.chaos.org/">www.chaos.org</a>',
-            '<a name="X">Short \'a name\' tag</a>',
-            '<td colspan="3" rowspan="5">Foo</td>',
-            '<td colspan=3 rowspan=5>Foo</td>',
-            '<td colspan=\'3\' rowspan=\'5\'>Foo</td>',
-            '<td rowspan="2" class="mugwump" >Bar</td>',
-            '<td nowrap>Very Long String running to 1000 characters...</td>',
-            '<td bgcolor="#00ff00" nowrap>Very Long String with a blue background</td>',
-            '<a href="proto1://www.foo.com">New protocol test</a>',
-            '<img src="proto2://www.foo.com" />',
-            '<a href="">bleep</a>',
-            '<a href="proto4://abc.xyz.foo.com">Another new protocol</a>',
-            '<a href="proto9://foo.foo.foo.foo.foo.org/">Test of "proto9"</a>',
-            '<td width="75">Bar!</td>',
-            '<td width="200">Long Cell</td>',
-            'search.php?q=";alert&#40;"XSS"&#41;;&n=1093&i=410',
-            'http://localhost/text.php/">alert&#40;Gehackt!&#41;;&lt;/form&gt;&lt;form action="/...',
         ];
     }
 
@@ -83,34 +75,38 @@ class XssTest extends TestCase
         ];
     }
 
-    function testIsXssFoundArray()
-    {
-        $xss = $this->security->xss();
-//        if (!$xss->isCompatible()) {
-//            $this->markTestSkipped('Arrays not supported for PHP 5.4');
-//        }
-        $testArray = $this->_testArray();
-        $result = $this->_resultIsFoundArray();
-
-        foreach ($testArray as $key => $string) {
-            $xss->clean($string);
-            $this->assertSame($xss->isXssFound(), $result[$key]);
-        }
-    }
-
     function testArray()
     {
 
-
-
         $xss = $this->security->xss();
-//        if (!$xss->isCompatible()) {
-//            $this->markTestSkipped('Arrays not supported for PHP 5.4');
-//        }
+
         $testArray = $this->_testArray();
         $resultArray = $this->_resultArray();
 
         $this->assertSame($resultArray, $xss->clean($testArray));
+    }
+
+    private function _resultArray()
+    {
+        return [
+            '<a href="http://www.chaos.org/">www.chaos.org</a>',
+            '<a name="X">Short \'a name\' tag</a>',
+            '<td colspan="3" rowspan="5">Foo</td>',
+            '<td colspan=3 rowspan=5>Foo</td>',
+            '<td colspan=\'3\' rowspan=\'5\'>Foo</td>',
+            '<td rowspan="2" class="mugwump" >Bar</td>',
+            '<td nowrap>Very Long String running to 1000 characters...</td>',
+            '<td bgcolor="#00ff00" nowrap>Very Long String with a blue background</td>',
+            '<a href="proto1://www.foo.com">New protocol test</a>',
+            '<img src="proto2://www.foo.com" />',
+            '<a href="">bleep</a>',
+            '<a href="proto4://abc.xyz.foo.com">Another new protocol</a>',
+            '<a href="proto9://foo.foo.foo.foo.foo.org/">Test of "proto9"</a>',
+            '<td width="75">Bar!</td>',
+            '<td width="200">Long Cell</td>',
+            'search.php?q=";alert&#40;"XSS"&#41;;&n=1093&i=410',
+            'http://localhost/text.php/">alert&#40;Gehackt!&#41;;&lt;/form&gt;&lt;form action="/...',
+        ];
     }
 
     /**
@@ -118,9 +114,6 @@ class XssTest extends TestCase
      */
     public function testFromJsXss()
     {
-//        if (!$this->security->xss()->isCompatible()) {
-//            $this->markTestSkipped('Disabled test for PHP 5.4');
-//        }
 
         // 兼容各种奇葩输入
         $this->assertSame('', $this->security->xss()->clean(''));
@@ -128,9 +121,9 @@ class XssTest extends TestCase
         $this->assertSame(123, $this->security->xss()->clean(123));
         $this->assertSame('{a: 1111}', $this->security->xss()->clean('{a: 1111}'));
         // 清除不可见字符
-     //   if (!$this->security->xss()->isCompatible()) {
-            $this->assertSame("a\u0000\u0001\u0002\u0003\r\n b", $this->security->xss()->clean("a\u0000\u0001\u0002\u0003\r\n b"));
-     //   }
+        //   if (!$this->security->xss()->isCompatible()) {
+        $this->assertSame("a\u0000\u0001\u0002\u0003\r\n b", $this->security->xss()->clean("a\u0000\u0001\u0002\u0003\r\n b"));
+        //   }
         // 过滤不在白名单的标签
         $this->assertSame('<b>abcd</b>', $this->security->xss()->clean('<b>abcd</b>'));
         $this->assertSame('<o>abcd</o>', $this->security->xss()->clean('<o>abcd</o>'));

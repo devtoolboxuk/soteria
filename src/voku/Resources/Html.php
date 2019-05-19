@@ -15,10 +15,10 @@ class Html extends Resources
 
     public function naughtyHtml($str)
     {
-        $evil_html_tags = \implode('|', $this->_evil_html_tags);
+        $evil_html_tags = implode('|', $this->_evil_html_tags);
 
 
-        $str = (string) \preg_replace_callback(
+        $str = (string)preg_replace_callback(
             '#<(?<start>/*\s*)(?<content>' . $evil_html_tags . ')(?<end>[^><]*)(?<rest>[><]*)#ius',
             function ($matches) {
                 return $this->naughtyHtmlCallback($matches);
@@ -26,14 +26,14 @@ class Html extends Resources
             $str
         );
 
-        return (string) $str;
+        return (string)$str;
     }
 
     private function naughtyHtmlCallback(array $matches)
     {
         return '&lt;' . $matches['start'] . $matches['content'] . $matches['end'] // encode opening brace
             // encode captured opening or closing brace to prevent recursive vectors:
-            . \str_replace(
+            . str_replace(
                 [
                     '>',
                     '<',

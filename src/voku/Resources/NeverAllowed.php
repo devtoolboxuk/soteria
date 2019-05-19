@@ -1,20 +1,21 @@
 <?php
 
 namespace devtoolboxuk\soteria\voku\Resources;
+
 class NeverAllowed extends Resources
 {
 
     private $_never_allowed_reg_ex = [
 
-            // default javascript
-            '(\(?document\)?|\(?window\)?(\.document)?)\.(location|on\w*)',
-            // data-attribute + base64
-            "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
-            // remove Netscape 4 JS entities
-            '&\s*\{[^}]*(\}\s*;?|$)',
-            // old IE, old Netscape
-            'expression\s*(\(|&\#40;)',
-        ];
+        // default javascript
+        '(\(?document\)?|\(?window\)?(\.document)?)\.(location|on\w*)',
+        // data-attribute + base64
+        "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
+        // remove Netscape 4 JS entities
+        '&\s*\{[^}]*(\}\s*;?|$)',
+        // old IE, old Netscape
+        'expression\s*(\(|&\#40;)',
+    ];
 
     private $_never_allowed_on_events_afterwards = [
         'onAbort',
@@ -235,9 +236,7 @@ class NeverAllowed extends Resources
         '&lt;script&gt;',
         '&lt;/script&gt;',
     ];
-
-    private $_never_allowed_str = [];
-
+    
     private $_never_allowed_call_statements = [
         // default javascript
         'javascript',
@@ -262,30 +261,77 @@ class NeverAllowed extends Resources
         'view-source',
     ];
 
-    public function eventsAfterwards()
+    public function doNeverAllowedAfterwards($str)
     {
-        return $this->_never_allowed_on_events_afterwards;
+        if (stripos($str, 'on') !== false) {
+            foreach ($this->_never_allowed_on_events_afterwards as $event) {
+                if (stripos($str, $event) !== false) {
+                    $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\s|[^\p{L}]|$)';
+
+                    do {
+                        $count = $temp_count = 0;
+
+                        $str = (string)\preg_replace(
+                            '#' . $regex . '#ius',
+                            '$1' . $this->_replacement . '$2',
+                            $str,
+                            -1,
+                            $temp_count
+                        );
+                        $count += $temp_count;
+                    } while ($count);
+                }
+            }
+        }
+
+        return (string)str_ireplace(
+            $this->_never_allowed_str_afterwards,
+            $this->_replacement,
+            $str
+        );
     }
-    public function strAfterwards()
+
+    public function doNeverAllowed($str)
     {
-        return $this->_never_allowed_str_afterwards;
+        static $NEVER_ALLOWED_CACHE = [];
+
+        $NEVER_ALLOWED_CACHE['keys'] = null;
+        $NEVER_ALLOWED_CACHE['regex'] = null;
+
+        if ($NEVER_ALLOWED_CACHE['keys'] === null) {
+            $NEVER_ALLOWED_CACHE['keys'] = array_keys($this->neverAllowedStrings());
+        }
+
+        $str = str_ireplace(
+            $NEVER_ALLOWED_CACHE['keys'],
+            $this->neverAllowedStrings(),
+            $str
+        );
+
+
+        foreach ($this->_never_allowed_call_statements as $call) {
+            if (stripos($str, $call) !== false) {
+                $str = (string)preg_replace(
+                    '#([^\p{L}]|^)' . $call . '\s*:#ius',
+                    '$1' . $this->_replacement,
+                    $str
+                );
+            }
+        }
+
+
+        if ($NEVER_ALLOWED_CACHE['regex'] === null) {
+            $NEVER_ALLOWED_CACHE['regex'] = implode('|', $this->_never_allowed_reg_ex);
+        }
+
+        $str = (string)preg_replace('#' . $NEVER_ALLOWED_CACHE['regex'] . '#ius', $this->_replacement, $str);
+
+        return $str;
     }
 
-    public function regEx()
+    private function neverAllowedStrings()
     {
-        return $this->_never_allowed_reg_ex;
-    }
-
-    public function callStatements()
-    {
-        return $this->_never_allowed_call_statements;
-    }
-
-    function __construct()
-    {
-
-
-        $this->_never_allowed_str = [
+        return [
             'document.cookie' => $this->_replacement,
             '(document).cookie' => $this->_replacement,
             'document.write' => $this->_replacement,
@@ -304,85 +350,4 @@ class NeverAllowed extends Resources
             '<!ATTLIST' => '&lt;!ATTLIST',
         ];
     }
-
-    public function strings()
-    {
-        return $this->_never_allowed_str;
-    }
-
-    public function doNeverAllowedAfterwards($str)
-    {
-        if (\stripos($str, 'on') !== false) {
-            foreach ($this->_never_allowed_on_events_afterwards as $event) {
-                if (\stripos($str, $event) !== false) {
-                    $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\s|[^\p{L}]|$)';
-
-                    do {
-                        $count = $temp_count = 0;
-
-                        $str = (string) \preg_replace(
-                            '#' . $regex . '#ius',
-                            '$1' . $this->_replacement . '$2',
-                            $str,
-                            -1,
-                            $temp_count
-                        );
-                        $count += $temp_count;
-                    } while ($count);
-                }
-            }
-        }
-
-        return (string) \str_ireplace(
-            $this->_never_allowed_str_afterwards,
-            $this->_replacement,
-            $str
-        );
-    }
-
-    public function doNeverAllowed($str)
-    {
-        static $NEVER_ALLOWED_CACHE = [];
-
-        $NEVER_ALLOWED_CACHE['keys'] = null;
-        $NEVER_ALLOWED_CACHE['regex'] = null;
-
-        if ($NEVER_ALLOWED_CACHE['keys'] === null) {
-            $NEVER_ALLOWED_CACHE['keys'] = \array_keys($this->_never_allowed_str);
-        }
-
-        $str = \str_ireplace(
-            $NEVER_ALLOWED_CACHE['keys'],
-            $this->_never_allowed_str,
-            $str
-        );
-
-        // ---
-
-        foreach ($this->_never_allowed_call_statements as $call) {
-            if (\stripos($str, $call) !== false) {
-                $str = (string) \preg_replace(
-                    '#([^\p{L}]|^)' . $call . '\s*:#ius',
-                    '$1' . $this->_replacement,
-                    $str
-                );
-            }
-        }
-
-        // ---
-
-        if ($NEVER_ALLOWED_CACHE['regex'] === null) {
-            $NEVER_ALLOWED_CACHE['regex'] = \implode('|',$this->_never_allowed_reg_ex);
-        }
-
-        $str = (string) \preg_replace(
-            '#' . $NEVER_ALLOWED_CACHE['regex'] . '#ius',
-            $this->_replacement,
-            $str
-        );
-
-        return $str;
-    }
-
-
 }

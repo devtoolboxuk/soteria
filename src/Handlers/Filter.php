@@ -43,14 +43,6 @@ class Filter
     }
 
     /**
-     * @return null
-     */
-    public function isValid()
-    {
-        return $this->is_valid;
-    }
-
-    /**
      * @param string $data
      * @param string $type
      */
@@ -81,6 +73,14 @@ class Filter
             default:
                 break;
         }
+    }
+
+    /**
+     * @return null
+     */
+    public function isValid()
+    {
+        return $this->is_valid;
     }
 
 
