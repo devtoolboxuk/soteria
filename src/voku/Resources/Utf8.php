@@ -191,7 +191,7 @@ class Utf8 extends Resources
         }
 
         if (strpos($str, '&') === false && strpos($str, '%') === false && strpos($str, '+') === false && strpos($str, '\u') === false) {
-            return $this->fix_simple_utf8($str);
+            return $this->fixSimpleUtf8($str);
         }
 
         $pattern = '/%u([0-9a-fA-F]{3,4})/';
@@ -208,15 +208,14 @@ class Utf8 extends Resources
                 /**
                  * @psalm-suppress PossiblyInvalidArgument
                  */
-                $str = $this->fix_simple_utf8(rawurldecode($this->html_entity_decode($this->to_utf8($str), $flags))
-                );
+                $str = $this->fixSimpleUtf8(rawurldecode($this->htmlEntityDecode($this->toUtf8($str), $flags)));
             } while ($str_compare !== $str);
         }
 
         return $str;
     }
 
-    private function fix_simple_utf8($str)
+    private function fixSimpleUtf8($str)
     {
         if ($str === '') {
             return '';
@@ -234,7 +233,7 @@ class Utf8 extends Resources
             $BROKEN_UTF8_TO_UTF8_VALUES_CACHE = array_values($this->BROKEN_UTF8_FIX);
         }
 
-        return \str_replace($BROKEN_UTF8_TO_UTF8_KEYS_CACHE, $BROKEN_UTF8_TO_UTF8_VALUES_CACHE, $str);
+        return str_replace($BROKEN_UTF8_TO_UTF8_KEYS_CACHE, $BROKEN_UTF8_TO_UTF8_VALUES_CACHE, $str);
     }
 
     private function getData($file)
@@ -243,7 +242,7 @@ class Utf8 extends Resources
         return include __DIR__ . '/../Data/' . $file . '.php';
     }
 
-    private function html_entity_decode($str, $flags = null, $encoding = 'UTF-8')
+    private function htmlEntityDecode($str, $flags = null, $encoding = 'UTF-8')
     {
         if (
             !isset($str[3]) // examples: &; || &x;
@@ -262,7 +261,7 @@ class Utf8 extends Resources
         }
 
         if ($encoding !== 'UTF-8' && $encoding !== 'ISO-8859-1' && $encoding !== 'WINDOWS-1252' && $this->SUPPORT['mbstring'] === false) {
-            trigger_error('UTF8::html_entity_decode() without mbstring cannot handle "' . $encoding . '" encoding', \E_USER_WARNING);
+            trigger_error('UTF8::htmlEntityDecode() without mbstring cannot handle "' . $encoding . '" encoding', \E_USER_WARNING);
         }
 
         do {
@@ -432,12 +431,12 @@ class Utf8 extends Resources
         return $encoding;
     }
 
-    private function to_utf8($str, $decodeHtmlEntityToUtf8 = false)
+    private function toUtf8($str, $decodeHtmlEntityToUtf8 = false)
     {
 
         if (is_array($str) === true) {
             foreach ($str as $k => $v) {
-                $str[$k] = $this->to_utf8($v, $decodeHtmlEntityToUtf8);
+                $str[$k] = $this->toUtf8($v, $decodeHtmlEntityToUtf8);
             }
             return $str;
         }
@@ -464,7 +463,7 @@ class Utf8 extends Resources
                         $buf .= $c1 . $c2;
                         ++$i;
                     } else { // not valid UTF8 - convert it
-                        $buf .= $this->to_utf8_convert_helper($c1);
+                        $buf .= $this->toUtf8ConvertHelper($c1);
                     }
                 } elseif ($c1 >= "\xE0" && $c1 <= "\xEF") { // looks like 3 bytes UTF8
 
@@ -475,7 +474,7 @@ class Utf8 extends Resources
                         $buf .= $c1 . $c2 . $c3;
                         $i += 2;
                     } else { // not valid UTF8 - convert it
-                        $buf .= $this->to_utf8_convert_helper($c1);
+                        $buf .= $this->toUtf8ConvertHelper($c1);
                     }
                 } elseif ($c1 >= "\xF0" && $c1 <= "\xF7") { // looks like 4 bytes UTF8
 
@@ -487,15 +486,15 @@ class Utf8 extends Resources
                         $buf .= $c1 . $c2 . $c3 . $c4;
                         $i += 3;
                     } else { // not valid UTF8 - convert it
-                        $buf .= $this->to_utf8_convert_helper($c1);
+                        $buf .= $this->toUtf8ConvertHelper($c1);
                     }
                 } else { // doesn't look like UTF8, but should be converted
 
-                    $buf .= $this->to_utf8_convert_helper($c1);
+                    $buf .= $this->toUtf8ConvertHelper($c1);
                 }
             } elseif (($c1 & "\xC0") === "\x80") { // needs conversion
 
-                $buf .= $this->to_utf8_convert_helper($c1);
+                $buf .= $this->toUtf8ConvertHelper($c1);
             } else { // it doesn't need conversion
 
                 $buf .= $c1;
@@ -535,7 +534,7 @@ class Utf8 extends Resources
                     return (string)$this->chr(0xC0 | $cp >> 6) . (string)$this->chr(0x80 | $cp & 0x3F);
                 }
 
-                return $this->decimal_to_chr($cp);
+                return $this->decimalToChr($cp);
             },
             $buf
         );
@@ -546,13 +545,13 @@ class Utf8 extends Resources
 
         // decode UTF-8 codepoints
         if ($decodeHtmlEntityToUtf8 === true) {
-            $buf = $this->html_entity_decode($buf);
+            $buf = $this->htmlEntityDecode($buf);
         }
 
         return $buf;
     }
 
-    private function to_utf8_convert_helper($input)
+    private function toUtf8ConvertHelper($input)
     {
         // init
         $buf = '';
@@ -676,7 +675,7 @@ class Utf8 extends Resources
         return $CHAR_CACHE[$cacheKey] = $chr;
     }
 
-    private function encode($toEncoding, $str, $autodetectFromEncoding = true, $fromEncoding = '')
+    private function encode($toEncoding, $str)
     {
         if ($str === '' || $toEncoding === '') {
             return $str;
@@ -686,13 +685,13 @@ class Utf8 extends Resources
             $toEncoding = $this->normalize_encoding($toEncoding, 'UTF-8');
         }
 
-        if ($fromEncoding && $fromEncoding !== 'UTF-8' && $fromEncoding !== 'CP850') {
-            $fromEncoding = $this->normalize_encoding($fromEncoding, null);
-        }
+//        if ($fromEncoding && $fromEncoding !== 'UTF-8' && $fromEncoding !== 'CP850') {
+//            $fromEncoding = $this->normalize_encoding($fromEncoding, null);
+//        }
 
-        if ($toEncoding && $fromEncoding && $fromEncoding === $toEncoding) {
-            return $str;
-        }
+//        if ($toEncoding && $fromEncoding && $fromEncoding === $toEncoding) {
+//            return $str;
+//        }
 
         if ($toEncoding === 'JSON') {
             $return = $this->json_encode($str);
@@ -702,75 +701,75 @@ class Utf8 extends Resources
 
             return $return;
         }
-        if ($fromEncoding === 'JSON') {
-            $str = $this->json_decode($str);
-            $fromEncoding = '';
-        }
+//        if ($fromEncoding === 'JSON') {
+//            $str = $this->json_decode($str);
+//            $fromEncoding = '';
+//        }
 
         if ($toEncoding === 'BASE64') {
             return base64_encode($str);
         }
-        if ($fromEncoding === 'BASE64') {
-            $str = base64_decode($str, true);
-            $fromEncoding = '';
-        }
+//        if ($fromEncoding === 'BASE64') {
+//            $str = base64_decode($str, true);
+//            $fromEncoding = '';
+//        }
 
         if ($toEncoding === 'HTML-ENTITIES') {
-            return $this->html_encode($str, true, 'UTF-8');
+            return $this->htmlEncode($str, true, 'UTF-8');
         }
-        if ($fromEncoding === 'HTML-ENTITIES') {
-            $str = $this->html_decode($str, \ENT_COMPAT, 'UTF-8');
-            $fromEncoding = '';
-        }
+//        if ($fromEncoding === 'HTML-ENTITIES') {
+//            $str = $this->html_decode($str, \ENT_COMPAT, 'UTF-8');
+//            $fromEncoding = '';
+//        }
 
         $fromEncodingDetected = false;
-        if ($autodetectFromEncoding === true || !$fromEncoding) {
-            $fromEncodingDetected = $this->str_detect_encoding($str);
-        }
+//        if ($autodetectFromEncoding === true || !$fromEncoding) {
+//            $fromEncodingDetected = $this->str_detect_encoding($str);
+//        }
 
         // DEBUG
         //var_dump($toEncoding, $fromEncoding, $fromEncodingDetected, $str, "\n\n");
 
-        if ($fromEncodingDetected !== false) {
-            $fromEncoding = $fromEncodingDetected;
-        } elseif ($autodetectFromEncoding === true) {
-            // fallback for the "autodetect"-mode
-            return $this->to_utf8($str);
-        }
+//        if ($fromEncodingDetected !== false) {
+//            $fromEncoding = $fromEncodingDetected;
+//        } elseif ($autodetectFromEncoding === true) {
+//            // fallback for the "autodetect"-mode
+//            return $this->toUtf8($str);
+//        }
 
-        if (!$fromEncoding || $fromEncoding === $toEncoding) {
-            return $str;
-        }
+//        if (!$fromEncoding || $fromEncoding === $toEncoding) {
+//            return $str;
+//        }
 
-        if ($toEncoding === 'UTF-8' && ($fromEncoding === 'WINDOWS-1252' || $fromEncoding === 'ISO-8859-1')) {
-            return $this->to_utf8($str);
-        }
+//        if ($toEncoding === 'UTF-8' && ($fromEncoding === 'WINDOWS-1252' || $fromEncoding === 'ISO-8859-1')) {
+//            return $this->toUtf8($str);
+//        }
 
-        if ($toEncoding === 'ISO-8859-1' && ($fromEncoding === 'WINDOWS-1252' || $fromEncoding === 'UTF-8')) {
-            return $this->to_iso8859($str);
-        }
+//        if ($toEncoding === 'ISO-8859-1' && ($fromEncoding === 'WINDOWS-1252' || $fromEncoding === 'UTF-8')) {
+//            return $this->to_iso8859($str);
+//        }
 
         if ($toEncoding !== 'UTF-8' && $toEncoding !== 'ISO-8859-1' && $toEncoding !== 'WINDOWS-1252' && $this->SUPPORT['mbstring'] === false) {
             trigger_error('UTF8::encode() without mbstring cannot handle "' . $toEncoding . '" encoding', E_USER_WARNING);
         }
-
-        if ($this->SUPPORT['mbstring'] === true) {
-            // warning: do not use the symfony polyfill here
-            $strEncoded = mb_convert_encoding(
-                $str,
-                $toEncoding,
-                $fromEncoding
-            );
-
-            if ($strEncoded) {
-                return $strEncoded;
-            }
-        }
-
-        $return = \iconv($fromEncoding, $toEncoding, $str);
-        if ($return !== false) {
-            return $return;
-        }
+//
+//        if ($this->SUPPORT['mbstring'] === true) {
+//            // warning: do not use the symfony polyfill here
+//            $strEncoded = mb_convert_encoding(
+//                $str,
+//                $toEncoding,
+//                $fromEncoding
+//            );
+//
+//            if ($strEncoded) {
+//                return $strEncoded;
+//            }
+//        }
+//
+//        $return = \iconv($fromEncoding, $toEncoding, $str);
+//        if ($return !== false) {
+//            return $return;
+//        }
 
         return $str;
     }
@@ -784,7 +783,7 @@ class Utf8 extends Resources
         }
 
         /** @noinspection PhpComposerExtensionStubsInspection */
-        return \json_encode($value, $options, $depth);
+        return json_encode($value, $options, $depth);
     }
 
     private function filter($var, $normalization_form = \Normalizer::NFC, $leading_combining = '◌')
@@ -811,7 +810,7 @@ class Utf8 extends Resources
                     $var = $this->normalize_line_ending($var);
                 }
 
-                if ($this->is_ascii($var) === false) {
+                if ($this->isAscii($var) === false) {
                     if (\Normalizer::isNormalized($var, $normalization_form)) {
                         $n = '-';
                     } else {
@@ -845,10 +844,10 @@ class Utf8 extends Resources
 
     private function normalize_line_ending($str)
     {
-        return \str_replace(["\r\n", "\r"], "\n", $str);
+        return str_replace(["\r\n", "\r"], "\n", $str);
     }
 
-    private function is_ascii($str)
+    private function isAscii($str)
     {
         if ($str === '') {
             return true;
@@ -857,7 +856,7 @@ class Utf8 extends Resources
         return !preg_match('/[^\x09\x10\x13\x0A\x0D\x20-\x7E]/', $str);
     }
 
-    private function html_encode($str, $keepAsciiChars = false, $encoding = 'UTF-8')
+    private function htmlEncode($str, $keepAsciiChars = false, $encoding = 'UTF-8')
     {
         if ($str === '') {
             return '';
@@ -875,41 +874,37 @@ class Utf8 extends Resources
             }
 
             if ($encoding === 'UTF-8') {
-                return \mb_encode_numericentity(
+                return mb_encode_numericentity(
                     $str,
                     [$startCode, 0xfffff, 0, 0xfffff, 0]
                 );
             }
 
-            return \mb_encode_numericentity(
+            return mb_encode_numericentity(
                 $str,
                 [$startCode, 0xfffff, 0, 0xfffff, 0],
                 $encoding
             );
         }
 
-        return \implode(
+        return implode(
             '',
             \array_map(
                 function (string $chr) use ($keepAsciiChars, $encoding) {
-                    return $this->single_chr_html_encode($chr, $keepAsciiChars, $encoding);
+                    return $this->singleChrHtmlEncode($chr, $keepAsciiChars, $encoding);
                 },
-                $this->str_split($str)
+                $this->strSplit($str)
             )
         );
     }
 
-    private function single_chr_html_encode($char, $keepAsciiChars = false, $encoding = 'UTF-8')
+    private function singleChrHtmlEncode($char, $keepAsciiChars = false, $encoding = 'UTF-8')
     {
         if ($char === '') {
             return '';
         }
 
-        if (
-            $keepAsciiChars === true
-            &&
-            $this->is_ascii($char) === true
-        ) {
+        if ($keepAsciiChars === true && $this->isAscii($char) === true) {
             return $char;
         }
 
@@ -983,7 +978,7 @@ class Utf8 extends Resources
         return $CHAR_CACHE[$cacheKey] = $code;
     }
 
-    private function str_split($str, $length = 1, $cleanUtf8 = false, $tryToUseMbFunction = true)
+    private function strSplit($str, $length = 1, $cleanUtf8 = false, $tryToUseMbFunction = true)
     {
         if ($length <= 0) {
             return [];
@@ -991,7 +986,7 @@ class Utf8 extends Resources
 
         if (is_array($str) === true) {
             foreach ($str as $k => $v) {
-                $str[$k] = $this->str_split($v, $length, $cleanUtf8, $tryToUseMbFunction);
+                $str[$k] = $this->strSplit($v, $length, $cleanUtf8, $tryToUseMbFunction);
             }
 
             return $str;
@@ -1082,9 +1077,9 @@ class Utf8 extends Resources
         if ($length > 1) {
             $ret = \array_chunk($ret, $length);
 
-            return \array_map(
+            return array_map(
                 static function (&$item) {
-                    return \implode('', $item);
+                    return implode('', $item);
                 },
                 $ret
             );
@@ -1163,7 +1158,7 @@ class Utf8 extends Resources
             \mb_substitute_character($save);
         }
 
-        return \str_replace(
+        return str_replace(
             [
                 "\xEF\xBF\xBD",
                 '�',
@@ -1226,7 +1221,7 @@ class Utf8 extends Resources
             $str = \str_replace($BIDI_UNICODE_CONTROLS_CACHE, '', $str);
         }
 
-        return \str_replace($WHITESPACE_CACHE[$cacheKey], ' ', $str);
+        return str_replace($WHITESPACE_CACHE[$cacheKey], ' ', $str);
     }
 
     private function normalize_msword($str)
@@ -1271,7 +1266,7 @@ class Utf8 extends Resources
             '...', // … (U+2026) in UTF-8
         ];
 
-        return \str_replace($keys, $values, $str);
+        return str_replace($keys, $values, $str);
     }
 
     public function remove_bom($str)
@@ -1330,7 +1325,7 @@ class Utf8 extends Resources
         // 2.) simple check for ASCII chars
         //
 
-        if ($this->is_ascii($str) === true) {
+        if ($this->isAscii($str) === true) {
             return 'ASCII';
         }
 
@@ -1338,7 +1333,7 @@ class Utf8 extends Resources
         // 3.) simple check for UTF-8 chars
         //
 
-        if ($this->is_utf8($str) === true) {
+        if ($this->isUtf8($str) === true) {
             return 'UTF-8';
         }
 
@@ -1614,7 +1609,7 @@ class Utf8 extends Resources
 
     private function count_chars($str, $cleanUtf8 = false, $tryToUseMbFunction = true)
     {
-        return \array_count_values($this->str_split($str, 1, $cleanUtf8, $tryToUseMbFunction));
+        return array_count_values($this->strSplit($str, 1, $cleanUtf8, $tryToUseMbFunction));
     }
 
     /**
@@ -1703,11 +1698,11 @@ class Utf8 extends Resources
      *
      * @return bool
      */
-    private function is_utf8($str, $strict = false)
+    private function isUtf8($str)
     {
         if (\is_array($str) === true) {
-            foreach ($str as &$v) {
-                if ($this->is_utf8($v, $strict) === false) {
+            foreach ($str as $v) {
+                if ($this->isUtf8($v) === false) {
                     return false;
                 }
             }
@@ -1719,25 +1714,13 @@ class Utf8 extends Resources
             return true;
         }
 
-        if ($strict === true) {
-            $isBinary = $this->is_binary($str, true);
-
-            if ($isBinary && $this->is_utf16($str, false) !== false) {
-                return false;
-            }
-
-            if ($isBinary && $this->is_utf32($str, false) !== false) {
-                return false;
-            }
-        }
-
         if ($this->system->pcre_utf8_support() !== true) {
 
             // If even just the first character can be matched, when the /u
             // modifier is used, then it's valid UTF-8. If the UTF-8 is somehow
             // invalid, nothing at all will match, even if the string contains
             // some valid sequences
-            return \preg_match('/^.{1}/us', $str, $ar) === 1;
+            return preg_match('/^.{1}/us', $str, $ar) === 1;
         }
 
         $mState = 0; // cached expected number of octets after the current octet
@@ -1930,7 +1913,7 @@ class Utf8 extends Resources
         if (
             $keepUtf8Chars === true
             &&
-            $this->strlen($return) >= (int)$this->strlen($str_backup)
+            $this->stringLength($return) >= (int)$this->stringLength($str_backup)
         ) {
             return $str_backup;
         }
@@ -1939,90 +1922,29 @@ class Utf8 extends Resources
     }
 
     /**
-     * Get the string length, not the byte-length!
-     *
-     * @see     http://php.net/manual/en/function.mb-strlen.php
-     *
-     * @param string $str <p>The string being checked for length.</p>
-     * @param string $encoding [optional] <p>Set the charset for e.g. "mb_" function</p>
-     * @param bool $cleanUtf8 [optional] <p>Remove non UTF-8 chars from the string.</p>
-     *
-     * @return false|int
-     *                   The number <strong>(int)</strong> of characters in the string $str having character encoding
-     *                   $encoding.
-     *                   (One multi-byte character counted as +1).
-     *                   <br>
-     *                   Can return <strong>false</strong>, if e.g. mbstring is not installed and we process invalid
-     *                   chars.
+     * @param $str
+     * @param string $encoding
+     * @param bool $cleanUtf8
+     * @return bool|int
      */
-    private function strlen($str, $encoding = 'UTF-8', $cleanUtf8 = false)
+    private function stringLength($str)
     {
         if ($str === '') {
             return 0;
         }
 
-        if ($encoding !== 'UTF-8' && $encoding !== 'CP850') {
-            $encoding = $this->normalize_encoding($encoding, 'UTF-8');
-        }
-
-        if ($cleanUtf8 === true) {
-            // "mb_strlen" and "\iconv_strlen" returns wrong length,
-            // if invalid characters are found in $str
-            $str = $this->clean($str);
-        }
-
-        //
-        // fallback via mbstring
-        //
-
         if ($this->SUPPORT['mbstring'] === true) {
-            if ($encoding === 'UTF-8') {
-                return \mb_strlen($str);
-            }
-
-            return \mb_strlen($str, $encoding);
+            return mb_strlen($str, 'UTF-8');
         }
-
-        //
-        // fallback for binary || ascii only
-        //
-
-        if (
-            $encoding === 'CP850'
-            ||
-            $encoding === 'ASCII'
-        ) {
-            return \strlen($str);
-        }
-
-        if (
-            $encoding !== 'UTF-8'
-            &&
-            $this->SUPPORT['mbstring'] === false
-            &&
-            $this->SUPPORT['iconv'] === false
-        ) {
-            \trigger_error('UTF8::strlen() without mbstring / iconv cannot handle "' . $encoding . '" encoding', \E_USER_WARNING);
-        }
-
-        //
-        // fallback via iconv
-        //
 
         if ($this->SUPPORT['iconv'] === true) {
-            $returnTmp = \iconv_strlen($str, $encoding);
+            $returnTmp = \iconv_strlen($str, 'UTF-8');
             if ($returnTmp !== false) {
                 return $returnTmp;
             }
         }
 
-        //
-        // fallback via intl
-        //
-
         if (
-            $encoding === 'UTF-8' // INFO: "grapheme_strlen()" can't handle other encodings
-            &&
             $this->SUPPORT['intl'] === true
         ) {
             $returnTmp = \grapheme_strlen($str);
@@ -2031,12 +1953,8 @@ class Utf8 extends Resources
             }
         }
 
-        //
-        // fallback for ascii only
-        //
-
-        if ($this->is_ascii($str)) {
-            return \strlen($str);
+        if ($this->isAscii($str)) {
+            return strlen($str);
         }
 
         //
@@ -2053,9 +1971,9 @@ class Utf8 extends Resources
         return $returnTmp;
     }
 
-    private function decimal_to_chr($int)
+    private function decimalToChr($int)
     {
-        return $this->html_entity_decode('&#' . $int . ';', \ENT_QUOTES | \ENT_HTML5);
+        return $this->htmlEntityDecode('&#' . $int . ';', \ENT_QUOTES | \ENT_HTML5);
     }
 
 
