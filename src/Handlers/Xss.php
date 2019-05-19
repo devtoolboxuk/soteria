@@ -48,12 +48,11 @@ class Xss
 
         $this->system = new System();
 
-       $this->utf7 = new Utf7();
-       if ($this->isCompatible()) $this->utf8 = new Utf8();
+        $this->utf7 = new Utf7();
+        $this->utf8 = new Utf8();
 
         $this->strings = new StringResource();
     }
-
 
 
     function setString($str)
@@ -66,9 +65,26 @@ class Xss
         return $this->clean($array);
     }
 
-    public function cleanString($str)
+    /**
+     * @param $str
+     * @return array|mixed
+     */
+    public function clean($str)
     {
-        return $this->clean($str);
+        // reset
+        $this->_xss_found = null;
+
+        // check for an array of strings
+        if (\is_array($str)) {
+            foreach ($str as $key => $value) {
+                $str[$key] = $this->clean($value);
+            }
+            return $str;
+        }
+
+        $old_str_backup = $str;
+
+        return $this->process($str, $old_str_backup);
     }
 
     private function process($str, $old_str_backup)
@@ -87,12 +103,6 @@ class Xss
 
         return $str;
     }
-
-    public function isCompatible()
-    {
-        return $this->system->isPHPCompatible();
-    }
-
 
     /**
      * @param StringResource $str
@@ -120,22 +130,20 @@ class Xss
             return $str;
         }
 
-        if ($this->isCompatible()) {
-            // remove the BOM from UTF-8 / UTF-16 / UTF-32 strings
-            $str = $this->utf8->remove_bom($str);
+        // remove the BOM from UTF-8 / UTF-16 / UTF-32 strings
+        $str = $this->utf8->remove_bom($str);
 
-            // replace the diamond question mark (�) and invalid-UTF8 chars
-            //  if ($this->isCompatible()) {
-            $str = $this->utf8->replace_diamond_question_mark($str, '');
-            //  } else {
-            //      $str = $this->utf8->replace_diamond_question_mark($str, '',false);
-            //  }
+        // replace the diamond question mark (�) and invalid-UTF8 chars
+        //  if ($this->isCompatible()) {
+        $str = $this->utf8->replace_diamond_question_mark($str, '');
+        //  } else {
+        //      $str = $this->utf8->replace_diamond_question_mark($str, '',false);
+        //  }
 
-            // replace invisible characters with one single space
-            $str = $this->utf8->remove_invisible_characters($str, true, ' ');
+        // replace invisible characters with one single space
+        $str = $this->utf8->remove_invisible_characters($str, true, ' ');
 
-            $str = $this->utf8->normalize_whitespace($str);
-        }
+        $str = $this->utf8->normalize_whitespace($str);
         $str = $this->strings->replace($str);
 
         // decode UTF-7 characters
@@ -193,9 +201,7 @@ class Xss
                 $str
             );
         } else {
-            if ($this->isCompatible()) {
-                $str = $this->utf8->rawurldecode($str);
-            }
+            $str = $this->utf8->rawurldecode($str);
         }
 
         return $str;
@@ -215,70 +221,13 @@ class Xss
 
                     if ($tmpAntiXss->isXssFound() === true) {
                         $this->_xss_found = true;
-                        if ($this->isCompatible()) {
-                            $str = \str_replace($matchInner, $this->utf8->rawurldecode($urlPartClean), $str);
-                        }
+                        $str = \str_replace($matchInner, $this->utf8->rawurldecode($urlPartClean), $str);
                     }
                 }
             }
         } else {
-            if ($this->isCompatible()) {
-                $str = $this->_entity_decode($this->utf8->rawurldecode($str));
-            }
+            $str = $this->_entity_decode($this->utf8->rawurldecode($str));
         }
-
-        return $str;
-    }
-
-    /**
-     * @param $str
-     * @return array|mixed
-     */
-    public function clean($str)
-    {
-        // reset
-        $this->_xss_found = null;
-
-        if ($this->isCompatible()) {
-            // check for an array of strings
-            if (\is_array($str)) {
-                foreach ($str as $key => &$value) {
-                    $str[$key] = $this->clean($value);
-                }
-                return $str;
-            }
-        }
-
-        $old_str_backup = $str;
-
-        return $this->process($str, $old_str_backup);
-    }
-
-    /**
-     * @param $str
-     * @return array|mixed
-     */
-    public function cleanUrl($str)
-    {
-        $str = $this->clean($str);
-
-        if (is_numeric($str) || is_null($str)) {
-            return $str;
-        }
-
-        if ($this->isCompatible()) {
-            if (\is_array($str)) {
-                foreach ($str as $key => &$value) {
-                    $str[$key] = $this->cleanUrl($value);
-                }
-                return $str;
-            }
-        }
-
-        do {
-            $decode_str = rawurldecode($str);
-            $str = $this->_do($str);
-        } while ($decode_str !== $str);
 
         return $str;
     }
@@ -403,5 +352,37 @@ class Xss
     {
         /** @noinspection PhpIncludeInspection */
         return include __DIR__ . '/../voku/Data/' . $file . '.php';
+    }
+
+    public function cleanString($str)
+    {
+        return $this->clean($str);
+    }
+
+    /**
+     * @param $str
+     * @return array|mixed
+     */
+    public function cleanUrl($str)
+    {
+        $str = $this->clean($str);
+
+        if (is_numeric($str) || is_null($str)) {
+            return $str;
+        }
+
+        if (\is_array($str)) {
+            foreach ($str as $key => $value) {
+                $str[$key] = $this->cleanUrl($value);
+            }
+            return $str;
+        }
+
+        do {
+            $decode_str = rawurldecode($str);
+            $str = $this->_do($str);
+        } while ($decode_str !== $str);
+
+        return $str;
     }
 }

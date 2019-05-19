@@ -86,9 +86,9 @@ class XssTest extends TestCase
     function testIsXssFoundArray()
     {
         $xss = $this->security->xss();
-        if (!$xss->isCompatible()) {
-            $this->markTestSkipped('Arrays not supported for PHP 5.4');
-        }
+//        if (!$xss->isCompatible()) {
+//            $this->markTestSkipped('Arrays not supported for PHP 5.4');
+//        }
         $testArray = $this->_testArray();
         $result = $this->_resultIsFoundArray();
 
@@ -104,9 +104,9 @@ class XssTest extends TestCase
 
 
         $xss = $this->security->xss();
-        if (!$xss->isCompatible()) {
-            $this->markTestSkipped('Arrays not supported for PHP 5.4');
-        }
+//        if (!$xss->isCompatible()) {
+//            $this->markTestSkipped('Arrays not supported for PHP 5.4');
+//        }
         $testArray = $this->_testArray();
         $resultArray = $this->_resultArray();
 
@@ -128,9 +128,9 @@ class XssTest extends TestCase
         $this->assertSame(123, $this->security->xss()->clean(123));
         $this->assertSame('{a: 1111}', $this->security->xss()->clean('{a: 1111}'));
         // 清除不可见字符
-        if (!$this->security->xss()->isCompatible()) {
+     //   if (!$this->security->xss()->isCompatible()) {
             $this->assertSame("a\u0000\u0001\u0002\u0003\r\n b", $this->security->xss()->clean("a\u0000\u0001\u0002\u0003\r\n b"));
-        }
+     //   }
         // 过滤不在白名单的标签
         $this->assertSame('<b>abcd</b>', $this->security->xss()->clean('<b>abcd</b>'));
         $this->assertSame('<o>abcd</o>', $this->security->xss()->clean('<o>abcd</o>'));

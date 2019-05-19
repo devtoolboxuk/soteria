@@ -484,12 +484,12 @@ class Utf8 extends Resources
     public function to_utf8($str, $decodeHtmlEntityToUtf8 = false)
     {
 
-            if (\is_array($str) === true) {
-                foreach ($str as $k => &$v) {
-                    $v = $this->to_utf8($v, $decodeHtmlEntityToUtf8);
-                }
-                return $str;
+        if (\is_array($str) === true) {
+            foreach ($str as $k => $v) {
+                $str[$k] = $this->to_utf8($v, $decodeHtmlEntityToUtf8);
             }
+            return $str;
+        }
 
 
         $str = (string)$str;
@@ -890,15 +890,15 @@ class Utf8 extends Resources
     {
         switch (\gettype($var)) {
             case 'array':
-                foreach ($var as $k => &$v) {
-                    $v = $this->filter($v, $normalization_form, $leading_combining);
+                foreach ($var as $k => $v) {
+                    $var[$k] = $this->filter($v, $normalization_form, $leading_combining);
                 }
                 unset($v);
 
                 break;
             case 'object':
-                foreach ($var as $k => &$v) {
-                    $v = $this->filter($v, $normalization_form, $leading_combining);
+                foreach ($var as $k => $v) {
+                    $str[$k] = $this->filter($v, $normalization_form, $leading_combining);
                 }
                 unset($v);
 
@@ -1092,18 +1092,18 @@ class Utf8 extends Resources
             return [];
         }
 
-            if (\is_array($str) === true) {
-                foreach ($str as $k => &$v) {
-                    $v = $this->str_split(
-                        $v,
-                        $length,
-                        $cleanUtf8,
-                        $tryToUseMbFunction
-                    );
-                }
-
-                return $str;
+        if (\is_array($str) === true) {
+            foreach ($str as $k => $v) {
+                $str[$k] = $this->str_split(
+                    $v,
+                    $length,
+                    $cleanUtf8,
+                    $tryToUseMbFunction
+                );
             }
+
+            return $str;
+        }
 
         // init
         $str = (string)$str;
@@ -1684,12 +1684,15 @@ class Utf8 extends Resources
                 if (\count($strChars) === 0) {
                     $strChars = $this->count_chars($str, true, false);
                 }
-                foreach ($this->count_chars($test3) as $test3char => &$test3charEmpty) {
+                $countChars = $this->count_chars($test3);
+                foreach ($countChars as $test3char => $test3charEmpty) {
                     if (\in_array($test3char, $strChars, true) === true) {
                         ++$maybeUTF16LE;
                     }
+                    unset($countChars[$test3char]);
                 }
-                unset($test3charEmpty);
+
+
             }
         }
 
@@ -1702,12 +1705,14 @@ class Utf8 extends Resources
                 if (\count($strChars) === 0) {
                     $strChars = $this->count_chars($str, true, false);
                 }
-                foreach ($this->count_chars($test3) as $test3char => &$test3charEmpty) {
+                $countChars = $this->count_chars($test3);
+                foreach ($this->count_chars($test3) as $test3char => $test3charEmpty) {
                     if (\in_array($test3char, $strChars, true) === true) {
                         ++$maybeUTF16BE;
                     }
+                    unset($countChars[$test3char]);
                 }
-                unset($test3charEmpty);
+
             }
         }
 

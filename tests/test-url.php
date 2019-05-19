@@ -86,9 +86,7 @@ class UrlTest extends TestCase
     function testIsXssFoundArray()
     {
         $xss = $this->security->xss();
-        if (!$xss->isCompatible()) {
-            $this->markTestSkipped('Arrays not supported for PHP 5.4');
-        }
+
         $testArray = $this->_testArray();
         $result = $this->_resultIsFoundArray();
 
@@ -101,9 +99,7 @@ class UrlTest extends TestCase
     function testArray()
     {
         $xss = $this->security->xss();
-        if (!$xss->isCompatible()) {
-            $this->markTestSkipped('Arrays not supported for PHP 5.4');
-        }
+
         $testArray = $this->_testArray();
         $resultArray = $this->_resultArray();
 
@@ -115,9 +111,6 @@ class UrlTest extends TestCase
      */
     public function testFromJsXss()
     {
-        if (!$this->security->xss()->isCompatible()) {
-            $this->markTestSkipped('Disabled test for PHP 5.4');
-        }
 
         // 兼容各种奇葩输入
         $this->assertSame('', $this->security->xss()->cleanUrl(''));
