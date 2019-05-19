@@ -1,6 +1,13 @@
 # soteria
 
 [![Build Status](https://api.travis-ci.org/devtoolboxuk/soteria.svg?branch=master)](https://travis-ci.org/devtoolboxuk/soteria)
+[![Scrutinizer Code Quality](https://img.shields.io/scrutinizer/g/devtoolboxuk/soteria/master.svg?style=flat-square)](https://scrutinizer-ci.com/g/devtoolboxuk/soteria/?branch=master)
+[![Coveralls](https://coveralls.io/repos/github/devtoolboxuk/soteria/badge.svg?branch=master)](https://coveralls.io/github/devtoolboxuk/soteria?branch=master)
+[![CodeCov](https://codecov.io/gh/devtoolboxuk/soteria/branch/master/graph/badge.svg)](https://codecov.io/gh/devtoolboxuk/soteria)
+
+[![Latest Stable Version](https://img.shields.io/packagist/v/devtoolboxuk/soteria.svg?style=flat-square)](https://packagist.org/packages/devtoolboxuk/soteria)
+[![Total Downloads](https://img.shields.io/packagist/dt/devtoolboxuk/soteria.svg?style=flat-square)](https://packagist.org/packages/devtoolboxuk/soteria)
+[![License](https://img.shields.io/packagist/l/devtoolboxuk/soteria.svg?style=flat-square)](https://packagist.org/packages/devtoolboxuk/soteria)
 
 
 ## Table of Contents
