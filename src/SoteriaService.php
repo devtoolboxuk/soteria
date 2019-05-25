@@ -4,22 +4,31 @@ namespace devtoolboxuk\soteria;
 
 use devtoolboxuk\soteria\handlers\Sanitise;
 use devtoolboxuk\soteria\handlers\Xss;
-use devtoolboxuk\soteria\handlers\XssClean;
-
 
 class SoteriaService implements SoteriaInterface
 {
+    private static $instance = null;
 
+    /**
+     * @return Sanitise|null
+     */
     public function sanitise()
     {
-        return new Sanitise();
+        if (self::$instance === null) {
+            self::$instance = new Sanitise();
+        }
+        return self::$instance;
     }
 
+    /**
+     * @return Xss|null
+     */
     public function xss()
     {
-        return new Xss();
+        if (self::$instance === null) {
+            self::$instance = new Xss();
+        }
+        return self::$instance;
     }
-
-
 
 }
