@@ -140,7 +140,7 @@ class Sanitise
 
             case "number_int":
             case "int":
-                $filterResult = $this->filters->filtetInt($data);
+                $filterResult = $this->filters->filterInt($data);
                 break;
 
             case "full_special_chars":
