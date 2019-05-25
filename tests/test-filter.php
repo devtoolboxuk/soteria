@@ -4,23 +4,11 @@ namespace devtoolboxuk\soteria;
 
 use PHPUnit\Framework\TestCase;
 
-class FilterTest extends TestCase
+class SanitiseTest extends TestCase
 {
-    private $security;
-    private $filter;
-
-    function __construct($name = null, array $data = [], $dataName = '')
-    {
-        parent::__construct($name, $data, $dataName);
-        $this->security = new SoteriaService();
-
-        $this->filter = $this->security->filter();
-    }
-
     protected $testString = 'Test String';
     protected $testEmail = 'test@test.local';
     protected $testUrl = 'https://www.google.com';
-
     protected $latinAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     protected $numbers = '0123456789';
     protected $specialCharactersA = '!"£$%^&*()_+{}:@~<>?¬|';
@@ -45,20 +33,245 @@ class FilterTest extends TestCase
     protected $chineseSimplifiedB = "步 巢 惠 鞋 莓 圆 听 实 证 龙 卖 龟 艺 战 绳 关 铁 图 团 转 广 恶 丰 脑 杂 压 鸡 价 乐 气";
     protected $chineseSimplifiedC = "厅 发 劳 剑 岁 权 烧 赞 两 译 观 营 处 齿 驿 樱 产 药 读 颜 声 学 体 点 麦 虫 旧 会 万 盗";
     protected $chineseSimplifiedD = "宝 国 医 双 昼 触 来 画 黄 区";
-
     protected $testArray = [];
+    private $security;
+    private $sanitise;
+
+    function __construct($name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        $this->security = new SoteriaService();
+
+        $this->sanitise = $this->security->sanitise();
+    }
 
     function testEmail()
     {
-        $this->assertSame($this->testEmail, $this->filter->email($this->testEmail));
-        $this->assertNotEquals($this->testString, $this->filter->email($this->testEmail));
-        $this->assertFalse($this->filter->email($this->testString));
+        $this->sanitise->disinfect('test@test.com', 'email');
+
+        $result = $this->sanitise->result();
+        if ($result->isValid()) {
+            echo "\nValid";
+        }
     }
 
-    function testInt()
-    {
-        $this->assertSame($this->numbers, $this->filter->int($this->numbers));
-        $this->assertNotEquals($this->testString, $this->filter->email($this->numbers));
-        $this->assertFalse($this->filter->int($this->testString));
-    }
+//
+//
+//    function testArrayEmailFilter()
+//    {
+//        $equalsArray = [
+//            ['!$%^&*_+{}@~?|', $this->specialCharactersA],
+//            ["`-=[]'#.`", $this->specialCharactersB],
+//            ["O'Neil", "O\'Neil"],
+//            ["O'Neil", "O\\\'Neil"],
+//            ["coDepartment", "c/o Department"]
+//        ];
+//
+//        foreach ($equalsArray as $arr) {
+//            $disinfect = s::filter()->string($arr[1])
+//                ->filterEmail();
+//            $this->assertEquals($arr[0], $disinfect->cleanse());
+//        }
+//    }
+//
+//    function testArrayStringFilter()
+//    {
+//        $equalsArray = [
+//            //Character Sets
+//            [$this->numbers, $this->numbers],
+//            [$this->latinAlphabet, $this->latinAlphabet],
+//            [$this->latinAlphabet . $this->numbers, $this->latinAlphabet . $this->numbers],
+//            [$this->germanSpecialCharacters, $this->germanSpecialCharacters],
+//            [$this->frenchSpecialCharacters, $this->frenchSpecialCharacters],
+//            [$this->dutchSpecialCharacters, $this->dutchSpecialCharacters],
+//            [$this->spanishSpecialCharacters, $this->spanishSpecialCharacters],
+//            [$this->scandinavianSpecialCharactersA, $this->scandinavianSpecialCharactersA],
+//            [$this->scandinavianSpecialCharactersB, $this->scandinavianSpecialCharactersB],
+//            [$this->irishSpecialCharacters, $this->irishSpecialCharacters],
+//            [$this->cyrillicCharactersA, $this->cyrillicCharactersA],
+//            [$this->cyrillicCharactersB, $this->cyrillicCharactersB],
+//            [$this->arabic, $this->arabic],
+//            [$this->chineseTraditionalA, $this->chineseTraditionalA],
+//            [$this->chineseTraditionalB, $this->chineseTraditionalB],
+//            [$this->chineseTraditionalC, $this->chineseTraditionalC],
+//            [$this->chineseTraditionalD, $this->chineseTraditionalD],
+//            [$this->chineseSimplifiedA, $this->chineseSimplifiedA],
+//            [$this->chineseSimplifiedB, $this->chineseSimplifiedB],
+//            [$this->chineseSimplifiedC, $this->chineseSimplifiedC],
+//            [$this->chineseSimplifiedD, $this->chineseSimplifiedD],
+//            //Known Cases
+//            ['!"£$%^&*()_+{}:@~?¬|', $this->specialCharactersA],
+//            ["`-=[];'#,./`", $this->specialCharactersB],
+//            ["O'Neil", "O\'Neil"],
+//            ["O'Neil", "O\\\'Neil"],
+//            ["c/o Department", "c/o Department"],
+//            //HTML
+//            ["testing", '<a href="http://www.google.co.uk">testing</a>']
+//        ];
+//
+//        foreach ($equalsArray as $arr) {
+//            $disinfect = s::filter()->string($arr[1])
+//                ->filterString();
+//            $this->assertEquals($arr[0], $disinfect->cleanse());
+//        }
+//    }
+//
+//    function testArraySpecialFilter()
+//    {
+//        $equalsArray = [
+//            //Character Sets
+//            [$this->numbers, $this->numbers],
+//            [$this->latinAlphabet, $this->latinAlphabet],
+//            [$this->latinAlphabet . $this->numbers, $this->latinAlphabet . $this->numbers],
+//
+//            //Known Cases
+//            ['!"£$%^&*()_+{}:@~?¬|', $this->specialCharactersA],
+//            ["`-=[];&#39;#,./`", $this->specialCharactersB],
+//            ["O&#39;Neil", "O\'Neil"],
+//            ["O&#39;Neil", "O\\\'Neil"],
+//            ["c/o Department", "c/o Department"],
+//            //HTML
+//            ["testing", '<a href="http://www.google.co.uk">testing</a>']
+//        ];
+//
+//        foreach ($equalsArray as $arr) {
+//            $disinfect = s::filter()->string($arr[1])
+//                ->filterSpecial();
+//            $this->assertEquals($arr[0], $disinfect->cleanse());
+//        }
+//    }
+//
+//    function testArrayUrlFilter()
+//    {
+//        $equalsArray = [
+//            //Character Sets
+//            ["c/oDepartment", "c/o Department"],
+//            //HTML
+//            ["testing", '<a href="http://www.google.co.uk">testing</a>']
+//        ];
+//
+//        foreach ($equalsArray as $arr) {
+//            $disinfect = s::filter()->string($arr[1])
+//                ->filterUrl();
+//            $this->assertEquals($arr[0], $disinfect->cleanse());
+//        }
+//    }
+//
+//
+//    function testFilterInt()
+//    {
+//        $disinfect = s::filter()
+//            ->string("test@test.local")
+//            ->filterInt();
+//
+//        $this->assertEquals("", $disinfect->cleanse());
+//
+//        $disinfect = s::filter()
+//            ->string("2.2")
+//            ->filterInt();
+//
+//        $this->assertEquals("22", $disinfect->cleanse());
+//    }
+//
+//    function testFilterUrl()
+//    {
+//        $disinfect = s::filter()
+//            ->string($this->testUrl)
+//            ->filterUrl();
+//
+//        $this->assertEquals($this->testUrl, $disinfect->cleanse());
+//
+//    }
+//
+//    function testFilterSpecial()
+//    {
+//        $disinfect = s::filter()
+//            ->string($this->testUrl."?alert('Data')")
+//            ->filterSpecial();
+//
+//        $this->assertEquals($this->testUrl."?alert(&#39;Data&#39;)", $disinfect->cleanse());
+//    }
+//
+//    function testFilterFloat()
+//    {
+//        $disinfect = s::filter()
+//            ->string("test@test.local")
+//            ->filterFloat();
+//
+//        $this->assertEquals("", $disinfect->cleanse());
+//
+//        $disinfect = s::filter()
+//            ->string("2.2")
+//            ->filterFloat();
+//
+//        $this->assertEquals("22", $disinfect->cleanse());
+//
+//        $disinfect = s::filter()
+//            ->string("2.2")
+//            ->filterFloatFraction();
+//
+//        $this->assertEquals("2.2", $disinfect->cleanse());
+//    }
+//
+//
+//    function testEmailFilter()
+//    {
+//        $disinfect = s::filter()->string("test@test.local")
+//            ->filterEmail();
+//
+//        $this->assertEquals($this->testEmail, $disinfect->cleanse());
+//
+//
+//        $disinfect = s::filter()->string($this->testEmail)
+//            ->filterEmail();
+//
+//        $this->assertNotEquals($this->testString, $disinfect->cleanse());
+//
+//        $disinfect = s::filter()->string($this->testString)
+//            ->filterEmail();
+//
+//        $this->assertNotEquals($this->testString, $disinfect->cleanse());
+//    }
+//
+//    public function testBasicCleanse()
+//    {
+//        $equalsArray = [
+//            //Character Sets
+//            [$this->numbers, $this->numbers],
+//            [$this->latinAlphabet, $this->latinAlphabet],
+//            [$this->latinAlphabet . $this->numbers, $this->latinAlphabet . $this->numbers],
+//            [$this->germanSpecialCharacters, $this->germanSpecialCharacters],
+//            [$this->frenchSpecialCharacters, $this->frenchSpecialCharacters],
+//            [$this->dutchSpecialCharacters, $this->dutchSpecialCharacters],
+//            [$this->spanishSpecialCharacters, $this->spanishSpecialCharacters],
+//            [$this->scandinavianSpecialCharactersA, $this->scandinavianSpecialCharactersA],
+//            [$this->scandinavianSpecialCharactersB, $this->scandinavianSpecialCharactersB],
+//            [$this->irishSpecialCharacters, $this->irishSpecialCharacters],
+//            [$this->cyrillicCharactersA, $this->cyrillicCharactersA],
+//            [$this->cyrillicCharactersB, $this->cyrillicCharactersB],
+//            [$this->arabic, $this->arabic],
+//            [$this->chineseTraditionalA, $this->chineseTraditionalA],
+//            [$this->chineseTraditionalB, $this->chineseTraditionalB],
+//            [$this->chineseTraditionalC, $this->chineseTraditionalC],
+//            [$this->chineseTraditionalD, $this->chineseTraditionalD],
+//            [$this->chineseSimplifiedA, $this->chineseSimplifiedA],
+//            [$this->chineseSimplifiedB, $this->chineseSimplifiedB],
+//            [$this->chineseSimplifiedC, $this->chineseSimplifiedC],
+//            [$this->chineseSimplifiedD, $this->chineseSimplifiedD],
+//            //Known Cases
+//            ['!"£$%^&*()_+{}:@~?¬|', $this->specialCharactersA],
+//            ["`-=[];'#,./`", $this->specialCharactersB],
+//            ["O'Neil", "O\'Neil"],
+//            ["O'Neil", "O\\\'Neil"],
+//            ["c/o Department", "c/o Department"],
+//            //HTML
+//            ["testing", '<a href="http://www.google.co.uk">testing</a>']
+//        ];
+//
+//        foreach ($equalsArray as $arr) {
+//            $disinfect = s::filter()->string($arr[1]);
+//            $this->assertEquals($arr[0], $disinfect->cleanse());
+//        }
+//    }
+
 }

@@ -2,6 +2,7 @@
 
 namespace devtoolboxuk\soteria\handlers;
 
+use devtoolboxuk\soteria\models\SoteriaModel;
 use devtoolboxuk\soteria\voku\Resources\Attributes;
 
 use devtoolboxuk\soteria\voku\Resources\Exploded;
@@ -29,6 +30,8 @@ class Xss
     private $utf8;
     private $strings;
     private $system;
+    private $input;
+    private $output;
 
 
     function __construct()
@@ -82,12 +85,12 @@ class Xss
             return $str;
         }
 
-        $old_str_backup = $str;
-
-        return $this->process($str, $old_str_backup);
+        $this->input = $str;
+        $this->output = $this->process($str);
+        return $this->output;
     }
 
-    private function process($str, $old_str_backup)
+    private function process($str)
     {
 
         // process
@@ -98,7 +101,7 @@ class Xss
 
         // keep the old value, if there wasn't any XSS attack
         if ($this->_xss_found !== true) {
-            $str = $old_str_backup;
+            $str = $this->input;
         }
 
         return $str;
@@ -354,6 +357,7 @@ class Xss
      */
     public function cleanUrl($str)
     {
+        $this->input = $str;
         $str = $this->clean($str);
 
         if (is_numeric($str) || is_null($str)) {
@@ -372,6 +376,17 @@ class Xss
             $str = $this->_do($str);
         } while ($decode_str !== $str);
 
+        $this->output = $str;
+
         return $str;
+    }
+
+    function result()
+    {
+        $valid = false;
+        if (!$this->_xss_found) {
+            $valid = true;
+        }
+        return new SoteriaModel($this->input, $this->output, $valid);
     }
 }

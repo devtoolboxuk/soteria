@@ -13,7 +13,7 @@
     </filter>
 
     <testsuites>
-        <testsuite name="sanitiser">
+        <testsuite name="soteria">
             <directory prefix="test-" suffix=".php">./tests/</directory>
         </testsuite>
     </testsuites>

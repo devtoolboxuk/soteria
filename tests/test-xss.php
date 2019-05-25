@@ -17,6 +17,9 @@ class XssTest extends TestCase
     function testIsXssFoundArray()
     {
         $xss = $this->security->xss();
+
+        $xss->clean('<a href="http://www.chaos.org/">www.chaos.org</a>');
+
 //        if (!$xss->isCompatible()) {
 //            $this->markTestSkipped('Arrays not supported for PHP 5.4');
 //        }

@@ -236,7 +236,7 @@ class NeverAllowed extends Resources
         '&lt;script&gt;',
         '&lt;/script&gt;',
     ];
-    
+
     private $_never_allowed_call_statements = [
         // default javascript
         'javascript',
