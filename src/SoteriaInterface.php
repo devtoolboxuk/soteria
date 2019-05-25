@@ -4,7 +4,7 @@ namespace devtoolboxuk\soteria;
 
 interface SoteriaInterface
 {
-    public function sanitise();
+    public function sanitise($force);
 
-    public function xss();
+    public function xss($force);
 }
