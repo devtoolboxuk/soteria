@@ -19,8 +19,7 @@
   ],
   "require": {
     "php": ">=5.4.16",
-    "devtoolboxuk/sanitiser": "^1.0.2",
-    "devtoolboxuk/hashing": "^1.0.5"
+    "devtoolboxuk/utilitybundle": "~1.0.11"
   },
   "minimum-stability": "dev",
   "scripts": {

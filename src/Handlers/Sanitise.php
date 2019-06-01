@@ -4,6 +4,8 @@ namespace devtoolboxuk\soteria\handlers;
 
 
 use devtoolboxuk\soteria\classes\Filters;
+use devtoolboxuk\soteria\classes\Strings;
+use devtoolboxuk\soteria\classes\Url;
 use devtoolboxuk\soteria\models\SoteriaModel;
 
 class Sanitise
@@ -14,12 +16,14 @@ class Sanitise
     private $filters;
     private $input;
     private $output;
-
-    private $urlRegEx = '/\b((https?|ftp|file):\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
+    private $strings;
+    private $urlService;
 
     function __construct()
     {
         $this->filters = new Filters();
+        $this->strings = new Strings();
+        $this->urlService = new Url();
     }
 
     /**
@@ -42,8 +46,8 @@ class Sanitise
 
         $this->input = $data;
 
-        $data = $this->cleanString($data);
-        $data = preg_replace($this->urlRegEx, ' ', $data);
+        $data = $this->strings->clean($data);
+        $data = $this->urlService->remove($data);
 
         if ($this->input != $data) {
             $this->_sanitised = true;
@@ -57,33 +61,25 @@ class Sanitise
 
     /**
      * @param $data
-     * @return string
-     */
-    private function cleanString($data)
-    {
-        $data = implode("", explode("\\", $data));
-        return strip_tags(trim(stripslashes($data)));
-    }
-
-    /**
-     * @param $data
+     * @param string $toEncoding
+     * @param string $fromEncoding
      * @return array|false|string|string[]|null
      */
-    public function cleanse($data)
+    public function cleanse($data, $toEncoding = 'utf-8', $fromEncoding = 'auto')
     {
 
         if (is_array($data)) {
             foreach ($data as $key => $value) {
-                $data[$key] = $this->cleanse($value);
+                $data[$key] = $this->cleanse($value, $toEncoding, $fromEncoding);
             }
             return $data;
         }
 
         $this->input = $data;
-        $data = $this->cleanString($data);
-        $data = mb_convert_encoding($data, "utf-8", "auto");
+        $data = $this->strings->clean($data);
+        $data = mb_convert_encoding($data, $toEncoding, $fromEncoding);
         $data = htmlspecialchars_decode($data);
-        $data = $this->cleanString($data);
+        $data = $this->strings->clean($data);
         if ($this->input != $data) {
             $this->_sanitised = true;
         }
@@ -121,8 +117,8 @@ class Sanitise
 
         $this->input = $data;
 
-        $data = $this->cleanString($data);
-        $data = $this->stringLength($data, $stringLength);
+        $data = $this->strings->clean($data);
+        $data = $this->strings->stringLength($data, $stringLength);
 
         switch ($type) {
             case "email":
@@ -168,21 +164,6 @@ class Sanitise
         $this->is_valid = $filterResult->isValid();
         $this->output = $filterResult->getResult();
         return $this->output;
-    }
-
-    /**
-     * @param $data
-     * @param int $length
-     * @return bool|string
-     */
-    private function stringLength($data, $length = -1)
-    {
-        if ($length > 0) {
-            if (mb_strlen($data) > $length) {
-                $data = substr($data, 0, $length);
-            }
-        }
-        return $data;
     }
 
 
