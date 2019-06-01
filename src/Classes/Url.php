@@ -5,6 +5,8 @@ namespace devtoolboxuk\soteria\classes;
 class Url
 {
 
+    //Testing here - https://regex101.com/r/WtnC3m/2
+
     private $protocol = '(?:(?:[a-z]+:)?\/\/)';
     private $auth = '(?:\\S+(?::\\S*)?@)?';
     private $ip = '^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:[.](?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}';

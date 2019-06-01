@@ -7,7 +7,7 @@ class Utf8 extends Resources
 
     private $system;
     private $ENCODINGS;
-    private $SUPPORT = [];
+    private $_supported = [];
     private $BROKEN_UTF8_FIX;
     private $ORD;
     private $CHR;
@@ -81,55 +81,55 @@ class Utf8 extends Resources
 
     private function checkForSupport()
     {
-        if (!isset($this->SUPPORT['already_checked_via_portable_utf8'])) {
-            $this->SUPPORT['already_checked_via_portable_utf8'] = true;
+        if (!isset($this->_supported['already_checked_via_portable_utf8'])) {
+            $this->_supported['already_checked_via_portable_utf8'] = true;
 
             // http://php.net/manual/en/book.mbstring.php
-            $this->SUPPORT['mbstring'] = $this->system->mbstring_loaded();
-            $this->SUPPORT['mbstring_func_overload'] = $this->system->mbstring_overloaded();
-            if ($this->SUPPORT['mbstring'] === true) {
+            $this->_supported['mbstring'] = $this->system->mbstring_loaded();
+            $this->_supported['mbstring_func_overload'] = $this->system->mbstring_overloaded();
+            if ($this->_supported['mbstring'] === true) {
                 \mb_internal_encoding('UTF-8');
                 /** @noinspection UnusedFunctionResultInspection */
                 /** @noinspection PhpComposerExtensionStubsInspection */
                 \mb_regex_encoding('UTF-8');
-                $this->SUPPORT['mbstring_internal_encoding'] = 'UTF-8';
+                $this->_supported['mbstring_internal_encoding'] = 'UTF-8';
             }
 
             // http://php.net/manual/en/book.iconv.php
-            $this->SUPPORT['iconv'] = $this->system->iconv_loaded();
+            $this->_supported['iconv'] = $this->system->iconv_loaded();
 
             // http://php.net/manual/en/book.intl.php
-            $this->SUPPORT['intl'] = $this->system->intl_loaded();
-            $this->SUPPORT['intl__transliterator_list_ids'] = [];
+            $this->_supported['intl'] = $this->system->intl_loaded();
+            $this->_supported['intl__transliterator_list_ids'] = [];
 
             if (
-                $this->SUPPORT['intl'] === true
+                $this->_supported['intl'] === true
                 &&
                 \function_exists('transliterator_list_ids') === true
             ) {
                 /** @noinspection PhpComposerExtensionStubsInspection */
-                $this->SUPPORT['intl__transliterator_list_ids'] = \transliterator_list_ids();
+                $this->_supported['intl__transliterator_list_ids'] = \transliterator_list_ids();
             }
 
             // http://php.net/manual/en/class.intlchar.php
-            $this->SUPPORT['intlChar'] = $this->system->intlChar_loaded();
+            $this->_supported['intlChar'] = $this->system->intlChar_loaded();
 
             // http://php.net/manual/en/book.ctype.php
-            $this->SUPPORT['ctype'] = $this->system->ctype_loaded();
+            $this->_supported['ctype'] = $this->system->ctype_loaded();
 
             // http://php.net/manual/en/class.finfo.php
-            $this->SUPPORT['finfo'] = $this->system->finfo_loaded();
+            $this->_supported['finfo'] = $this->system->finfo_loaded();
 
             // http://php.net/manual/en/book.json.php
-            $this->SUPPORT['json'] = $this->system->json_loaded();
+            $this->_supported['json'] = $this->system->json_loaded();
 
             // http://php.net/manual/en/book.pcre.php
-            $this->SUPPORT['pcre_utf8'] = $this->system->pcre_utf8_support();
+            $this->_supported['pcre_utf8'] = $this->system->pcre_utf8_support();
 
-            $this->SUPPORT['symfony_polyfill_used'] = $this->system->symfony_polyfill_used();
-            if ($this->SUPPORT['symfony_polyfill_used'] === true) {
+            $this->_supported['symfony_polyfill_used'] = $this->system->symfony_polyfill_used();
+            if ($this->_supported['symfony_polyfill_used'] === true) {
                 \mb_internal_encoding('UTF-8');
-                $this->SUPPORT['mbstring_internal_encoding'] = 'UTF-8';
+                $this->_supported['mbstring_internal_encoding'] = 'UTF-8';
             }
         }
     }
@@ -219,7 +219,7 @@ class Utf8 extends Resources
             $flags = \ENT_QUOTES | \ENT_HTML5;
         }
 
-        if ($encoding !== 'UTF-8' && $encoding !== 'ISO-8859-1' && $encoding !== 'WINDOWS-1252' && $this->SUPPORT['mbstring'] === false) {
+        if ($encoding !== 'UTF-8' && $encoding !== 'ISO-8859-1' && $encoding !== 'WINDOWS-1252' && $this->_supported['mbstring'] === false) {
             trigger_error('UTF8::htmlEntityDecode() without mbstring cannot handle "' . $encoding . '" encoding', \E_USER_WARNING);
         }
 
@@ -227,7 +227,7 @@ class Utf8 extends Resources
             $str_compare = $str;
 
             // INFO: http://stackoverflow.com/questions/35854535/better-explanation-of-convmap-in-mb-encode-numericentity
-            if ($this->SUPPORT['mbstring'] === true) {
+            if ($this->_supported['mbstring'] === true) {
                 if ($encoding === 'UTF-8') {
                     $str = mb_decode_numericentity($str, [0x80, 0xfffff, 0, 0xfffff, 0]);
                 } else {
@@ -549,7 +549,7 @@ class Utf8 extends Resources
             $encoding = $this->normalize_encoding($encoding, 'UTF-8');
         }
 
-        if ($encoding !== 'UTF-8' && $encoding !== 'ISO-8859-1' && $encoding !== 'WINDOWS-1252' && $this->SUPPORT['mbstring'] === false) {
+        if ($encoding !== 'UTF-8' && $encoding !== 'ISO-8859-1' && $encoding !== 'WINDOWS-1252' && $this->_supported['mbstring'] === false) {
             trigger_error('UTF8::chr() without mbstring cannot handle "' . $encoding . '" encoding', \E_USER_WARNING);
         }
 
@@ -580,7 +580,7 @@ class Utf8 extends Resources
         // fallback via "IntlChar"
         //
 
-        if ($this->SUPPORT['intlChar'] === true) {
+        if ($this->_supported['intlChar'] === true) {
             /** @noinspection PhpComposerExtensionStubsInspection */
             $chr = IntlChar::chr($code_point);
 
@@ -709,11 +709,11 @@ class Utf8 extends Resources
 //            return $this->to_iso8859($str);
 //        }
 
-        if ($toEncoding !== 'UTF-8' && $toEncoding !== 'ISO-8859-1' && $toEncoding !== 'WINDOWS-1252' && $this->SUPPORT['mbstring'] === false) {
+        if ($toEncoding !== 'UTF-8' && $toEncoding !== 'ISO-8859-1' && $toEncoding !== 'WINDOWS-1252' && $this->_supported['mbstring'] === false) {
             trigger_error('UTF8::encode() without mbstring cannot handle "' . $toEncoding . '" encoding', E_USER_WARNING);
         }
 //
-//        if ($this->SUPPORT['mbstring'] === true) {
+//        if ($this->_supported['mbstring'] === true) {
 //            // warning: do not use the symfony polyfill here
 //            $strEncoded = mb_convert_encoding(
 //                $str,
@@ -738,7 +738,7 @@ class Utf8 extends Resources
     {
         $value = $this->filter($value);
 
-        if ($this->SUPPORT['json'] === false) {
+        if ($this->_supported['json'] === false) {
             throw new \RuntimeException('ext-json: is not installed');
         }
 
@@ -827,7 +827,7 @@ class Utf8 extends Resources
         }
 
         // INFO: http://stackoverflow.com/questions/35854535/better-explanation-of-convmap-in-mb-encode-numericentity
-        if ($this->SUPPORT['mbstring'] === true) {
+        if ($this->_supported['mbstring'] === true) {
             $startCode = 0x00;
             if ($keepAsciiChars === true) {
                 $startCode = 0x80;
@@ -857,6 +857,7 @@ class Utf8 extends Resources
             )
         );
     }
+
 
     private function singleChrHtmlEncode($char, $keepAsciiChars = false, $encoding = 'UTF-8')
     {
@@ -904,7 +905,7 @@ class Utf8 extends Resources
         // fallback via "IntlChar"
         //
 
-        if ($this->SUPPORT['intlChar'] === true) {
+        if ($this->_supported['intlChar'] === true) {
             /** @noinspection PhpComposerExtensionStubsInspection */
             $code = \IntlChar::ord($chr);
             if ($code) {
@@ -960,76 +961,8 @@ class Utf8 extends Resources
         }
 
 
-        if ($this->SUPPORT['mbstring'] === true) {
-            $iMax = \mb_strlen($str);
-            if ($iMax <= 127) {
-                $ret = [];
-                for ($i = 0; $i < $iMax; ++$i) {
-                    $ret[] = \mb_substr($str, $i, 1);
-                }
-            } else {
-                $retArray = [];
-                preg_match_all('/./us', $str, $retArray);
-                $ret = isset($retArray[0]) ? $retArray[0] : [];
-            }
-        } elseif ($this->SUPPORT['pcre_utf8'] === true) {
-            $retArray = [];
-            preg_match_all('/./us', $str, $retArray);
-            $ret = isset($retArray[0]) ? $retArray[0] : [];
-        } else {
-
-            // fallback
-
-            $ret = [];
-            $len = \strlen($str);
-
-            /** @noinspection ForeachInvariantsInspection */
-            for ($i = 0; $i < $len; ++$i) {
-                if (($str[$i] & "\x80") === "\x00") {
-                    $ret[] = $str[$i];
-                } elseif (
-                    isset($str[$i + 1])
-                    &&
-                    ($str[$i] & "\xE0") === "\xC0"
-                ) {
-                    if (($str[$i + 1] & "\xC0") === "\x80") {
-                        $ret[] = $str[$i] . $str[$i + 1];
-
-                        ++$i;
-                    }
-                } elseif (
-                    isset($str[$i + 2])
-                    &&
-                    ($str[$i] & "\xF0") === "\xE0"
-                ) {
-                    if (
-                        ($str[$i + 1] & "\xC0") === "\x80"
-                        &&
-                        ($str[$i + 2] & "\xC0") === "\x80"
-                    ) {
-                        $ret[] = $str[$i] . $str[$i + 1] . $str[$i + 2];
-
-                        $i += 2;
-                    }
-                } elseif (
-                    isset($str[$i + 3])
-                    &&
-                    ($str[$i] & "\xF8") === "\xF0"
-                ) {
-                    if (
-                        ($str[$i + 1] & "\xC0") === "\x80"
-                        &&
-                        ($str[$i + 2] & "\xC0") === "\x80"
-                        &&
-                        ($str[$i + 3] & "\xC0") === "\x80"
-                    ) {
-                        $ret[] = $str[$i] . $str[$i + 1] . $str[$i + 2] . $str[$i + 3];
-
-                        $i += 3;
-                    }
-                }
-            }
-        }
+        //gere
+        $ret = $this->strSplitString($str);
 
         if ($length > 1) {
             $ret = \array_chunk($ret, $length);
@@ -1044,6 +977,94 @@ class Utf8 extends Resources
 
         if (isset($ret[0]) && $ret[0] === '') {
             return [];
+        }
+
+        return $ret;
+    }
+
+    private function strSplitString($str)
+    {
+        $supportString = 'default';
+        if ($this->_supported['mbstring'] === true) {
+            $supportString = 'mbstring';
+        }
+        if ($this->_supported['pcre_utf8'] === true) {
+            $supportString = 'pcre_utf8';
+        }
+
+        switch ($supportString) {
+
+            case 'mbstring':
+
+                $iMax = \mb_strlen($str);
+                if ($iMax <= 127) {
+                    $ret = [];
+                    for ($i = 0; $i < $iMax; ++$i) {
+                        $ret[] = \mb_substr($str, $i, 1);
+                    }
+                } else {
+                    $retArray = [];
+                    preg_match_all('/./us', $str, $retArray);
+                    $ret = isset($retArray[0]) ? $retArray[0] : [];
+                }
+
+                break;
+            case 'pcre_utf8':
+                $retArray = [];
+                preg_match_all('/./us', $str, $retArray);
+                $ret = isset($retArray[0]) ? $retArray[0] : [];
+                break;
+            default:
+                $ret = [];
+                $len = \strlen($str);
+
+                /** @noinspection ForeachInvariantsInspection */
+                for ($i = 0; $i < $len; ++$i) {
+                    if (($str[$i] & "\x80") === "\x00") {
+                        $ret[] = $str[$i];
+                    } elseif (
+                        isset($str[$i + 1])
+                        &&
+                        ($str[$i] & "\xE0") === "\xC0"
+                    ) {
+                        if (($str[$i + 1] & "\xC0") === "\x80") {
+                            $ret[] = $str[$i] . $str[$i + 1];
+
+                            ++$i;
+                        }
+                    } elseif (
+                        isset($str[$i + 2])
+                        &&
+                        ($str[$i] & "\xF0") === "\xE0"
+                    ) {
+                        if (
+                            ($str[$i + 1] & "\xC0") === "\x80"
+                            &&
+                            ($str[$i + 2] & "\xC0") === "\x80"
+                        ) {
+                            $ret[] = $str[$i] . $str[$i + 1] . $str[$i + 2];
+
+                            $i += 2;
+                        }
+                    } elseif (
+                        isset($str[$i + 3])
+                        &&
+                        ($str[$i] & "\xF8") === "\xF0"
+                    ) {
+                        if (
+                            ($str[$i + 1] & "\xC0") === "\x80"
+                            &&
+                            ($str[$i + 2] & "\xC0") === "\x80"
+                            &&
+                            ($str[$i + 3] & "\xC0") === "\x80"
+                        ) {
+                            $ret[] = $str[$i] . $str[$i + 1] . $str[$i + 2] . $str[$i + 3];
+
+                            $i += 3;
+                        }
+                    }
+                }
+                break;
         }
 
         return $ret;
@@ -1107,7 +1128,7 @@ class Utf8 extends Resources
                 $replacementCharHelper = 'none';
             }
 
-            if ($this->SUPPORT['mbstring'] === false) {
+            if ($this->_supported['mbstring'] === false) {
                 // if there is no native support for "mbstring",
                 // then we need to clean the string before ...
                 $str = $this->clean($str);
