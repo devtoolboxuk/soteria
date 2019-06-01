@@ -12,6 +12,7 @@ class Utf8 extends Resources
     private $ORD;
     private $CHR;
     private $WIN1252_TO_UTF8;
+
     private $BOM = [
         "\xef\xbb\xbf" => 3, // UTF-8 BOM
         'ï»¿' => 6, // UTF-8 BOM as "WINDOWS-1252" (one char has [maybe] more then one byte ...)
@@ -185,12 +186,21 @@ class Utf8 extends Resources
         return str_replace($BROKEN_UTF8_TO_UTF8_KEYS_CACHE, $BROKEN_UTF8_TO_UTF8_VALUES_CACHE, $str);
     }
 
+    /**
+     * @param $file
+     * @return mixed
+     */
     private function getData($file)
     {
-
         return include __DIR__ . '/../Data/' . $file . '.php';
     }
 
+    /**
+     * @param $str
+     * @param null $flags
+     * @param string $encoding
+     * @return bool|false|string|string[]|null
+     */
     private function htmlEntityDecode($str, $flags = null, $encoding = 'UTF-8')
     {
         if (
@@ -256,6 +266,11 @@ class Utf8 extends Resources
         return $str;
     }
 
+    /**
+     * @param $encoding
+     * @param string $fallback
+     * @return mixed|string
+     */
     private function normalize_encoding($encoding, $fallback = '')
     {
         static $STATIC_NORMALIZE_ENCODING_CACHE = [];
@@ -923,7 +938,7 @@ class Utf8 extends Resources
         return $CHAR_CACHE[$cacheKey] = $code;
     }
 
-    private function strSplit($str, $length = 1, $cleanUtf8 = false, $tryToUseMbFunction = true)
+    private function strSplit($str, $length = 1)
     {
         if ($length <= 0) {
             return [];
@@ -931,7 +946,7 @@ class Utf8 extends Resources
 
         if (is_array($str) === true) {
             foreach ($str as $key => $value) {
-                $str[$key] = $this->strSplit($value, $length, $cleanUtf8, $tryToUseMbFunction);
+                $str[$key] = $this->strSplit($value, $length);
             }
 
             return $str;
@@ -944,11 +959,8 @@ class Utf8 extends Resources
             return [];
         }
 
-        if ($cleanUtf8 === true) {
-            $str = $this->clean($str);
-        }
 
-        if ($tryToUseMbFunction === true && $this->SUPPORT['mbstring'] === true) {
+        if ($this->SUPPORT['mbstring'] === true) {
             $iMax = \mb_strlen($str);
             if ($iMax <= 127) {
                 $ret = [];
@@ -1035,6 +1047,11 @@ class Utf8 extends Resources
         }
 
         return $ret;
+    }
+
+    private function decimalToChr($int)
+    {
+        return $this->htmlEntityDecode('&#' . $int . ';', \ENT_QUOTES | \ENT_HTML5);
     }
 
     private function clean($str, $remove_bom = false, $normalize_whitespace = false, $normalize_msword = false, $keep_non_breaking_space = false, $replace_diamond_question_mark = false, $remove_invisible_characters = true)
@@ -1234,403 +1251,6 @@ class Utf8 extends Resources
         }
 
         return $str;
-    }
-
-//    private function str_detect_encoding($str)
-//    {
-//        // init
-//        $str = (string)$str;
-//
-//        //
-//        // 1.) check binary strings (010001001...) like UTF-16 / UTF-32 / PDF / Images / ...
-//        //
-//
-//        if ($this->is_binary($str, true) === true) {
-//            $isUtf16 = $this->is_utf16($str, false);
-//            if ($isUtf16 === 1) {
-//                return 'UTF-16LE';
-//            }
-//            if ($isUtf16 === 2) {
-//                return 'UTF-16BE';
-//            }
-//
-//            $isUtf32 = $this->is_utf32($str, false);
-//            if ($isUtf32 === 1) {
-//                return 'UTF-32LE';
-//            }
-//            if ($isUtf32 === 2) {
-//                return 'UTF-32BE';
-//            }
-//
-//            // is binary but not "UTF-16" or "UTF-32"
-//            return false;
-//        }
-//
-//        //
-//        // 2.) simple check for ASCII chars
-//        //
-//
-//        if ($this->isAscii($str) === true) {
-//            return 'ASCII';
-//        }
-//
-//        //
-//        // 3.) simple check for UTF-8 chars
-//        //
-//
-//        if ($this->isUtf8($str) === true) {
-//            return 'UTF-8';
-//        }
-//
-//        //
-//        // 4.) check via "mb_detect_encoding()"
-//        //
-//        // INFO: UTF-16, UTF-32, UCS2 and UCS4, encoding detection will fail always with "mb_detect_encoding()"
-//
-//        $detectOrder = [
-//            'ISO-8859-1',
-//            'ISO-8859-2',
-//            'ISO-8859-3',
-//            'ISO-8859-4',
-//            'ISO-8859-5',
-//            'ISO-8859-6',
-//            'ISO-8859-7',
-//            'ISO-8859-8',
-//            'ISO-8859-9',
-//            'ISO-8859-10',
-//            'ISO-8859-13',
-//            'ISO-8859-14',
-//            'ISO-8859-15',
-//            'ISO-8859-16',
-//            'WINDOWS-1251',
-//            'WINDOWS-1252',
-//            'WINDOWS-1254',
-//            'CP932',
-//            'CP936',
-//            'CP950',
-//            'CP866',
-//            'CP850',
-//            'CP51932',
-//            'CP50220',
-//            'CP50221',
-//            'CP50222',
-//            'ISO-2022-JP',
-//            'ISO-2022-KR',
-//            'JIS',
-//            'JIS-ms',
-//            'EUC-CN',
-//            'EUC-JP',
-//        ];
-//
-//        if ($this->SUPPORT['mbstring'] === true) {
-//            // info: do not use the symfony polyfill here
-//            $encoding = \mb_detect_encoding($str, $detectOrder, true);
-//            if ($encoding) {
-//                return $encoding;
-//            }
-//        }
-//
-//        //
-//        // 5.) check via "iconv()"
-//        //
-//
-//        if ($this->ENCODINGS === null) {
-//            $this->ENCODINGS = $this->getData('encodings');
-//        }
-//
-//        foreach ($this->ENCODINGS as $encodingTmp) {
-//            // INFO: //IGNORE but still throw notice
-//            /** @noinspection PhpUsageOfSilenceOperatorInspection */
-//            if ((string)@\iconv($encodingTmp, $encodingTmp . '//IGNORE', $str) === $str) {
-//                return $encodingTmp;
-//            }
-//        }
-//
-//        return false;
-//    }
-
-    private function decimalToChr($int)
-    {
-        return $this->htmlEntityDecode('&#' . $int . ';', \ENT_QUOTES | \ENT_HTML5);
-    }
-//
-//    private function is_utf16($str, $checkIfStringIsBinary = true)
-//    {
-//
-//        // init
-//        $str = (string)$str;
-//        $strChars = [];
-//
-//        if (
-//            $checkIfStringIsBinary === true
-//            &&
-//            $this->is_binary($str, true) === false
-//        ) {
-//            return false;
-//        }
-//
-//        if ($this->SUPPORT['mbstring'] === false) {
-//            \trigger_error('UTF8::is_utf16() without mbstring may did not work correctly', \E_USER_WARNING);
-//        }
-//
-//        $str = $this->remove_bom($str);
-//
-//
-//        $maybeUTF16LE = 0;
-//        $test = \mb_convert_encoding($str, 'UTF-8', 'UTF-16LE');
-//        if ($test) {
-//            $test2 = \mb_convert_encoding($test, 'UTF-16LE', 'UTF-8');
-//            $test3 = \mb_convert_encoding($test2, 'UTF-8', 'UTF-16LE');
-//            if ($test3 === $test) {
-//                if (\count($strChars) === 0) {
-//                    $strChars = $this->count_chars($str, true, false);
-//                }
-//                $countChars = $this->count_chars($test3);
-//                foreach ($countChars as $test3char => $test3charEmpty) {
-//                    if (\in_array($test3char, $strChars, true) === true) {
-//                        ++$maybeUTF16LE;
-//                    }
-//                    unset($countChars[$test3char]);
-//                }
-//            }
-//        }
-//
-//        $maybeUTF16BE = 0;
-//        $test = \mb_convert_encoding($str, 'UTF-8', 'UTF-16BE');
-//        if ($test) {
-//            $test2 = \mb_convert_encoding($test, 'UTF-16BE', 'UTF-8');
-//            $test3 = \mb_convert_encoding($test2, 'UTF-8', 'UTF-16BE');
-//            if ($test3 === $test) {
-//                if (\count($strChars) === 0) {
-//                    $strChars = $this->count_chars($str, true, false);
-//                }
-//                $countChars = $this->count_chars($test3);
-//                foreach ($countChars as $test3char => $test3charEmpty) {
-//                    if (\in_array($test3char, $strChars, true) === true) {
-//                        ++$maybeUTF16BE;
-//                    }
-//                    unset($countChars[$test3char]);
-//                }
-//
-//            }
-//        }
-//
-//        if ($maybeUTF16BE !== $maybeUTF16LE) {
-//            if ($maybeUTF16LE > $maybeUTF16BE) {
-//                return 1;
-//            }
-//
-//            return 2;
-//        }
-//
-//        return false;
-//    }
-
-    /**
-     * Check if the string is UTF-32.
-     *
-     * @param mixed $str <p>The input string.</p>
-     * @param bool $checkIfStringIsBinary
-     *
-     * @return false|int
-     *                   <strong>false</strong> if is't not UTF-32,<br>
-     *                   <strong>1</strong> for UTF-32LE,<br>
-     *                   <strong>2</strong> for UTF-32BE
-     */
-    private function is_utf32($str, $checkIfStringIsBinary = true)
-    {
-        // init
-        $str = (string)$str;
-        $strChars = [];
-
-        if ($checkIfStringIsBinary === true && $this->is_binary($str, true) === false) {
-            return false;
-        }
-
-        if ($this->SUPPORT['mbstring'] === false) {
-            \trigger_error('UTF8::is_utf32() without mbstring may did not work correctly', \E_USER_WARNING);
-        }
-
-        $str = $this->remove_bom($str);
-
-        $maybeUTF32LE = 0;
-        $test = \mb_convert_encoding($str, 'UTF-8', 'UTF-32LE');
-        if ($test) {
-            $test2 = \mb_convert_encoding($test, 'UTF-32LE', 'UTF-8');
-            $test3 = \mb_convert_encoding($test2, 'UTF-8', 'UTF-32LE');
-            if ($test3 === $test) {
-                if (\count($strChars) === 0) {
-                    $strChars = $this->count_chars($str, true, false);
-                }
-                $countChars = $this->count_chars($test3);
-                foreach ($countChars as $test3char => $test3charEmpty) {
-                    if (\in_array($test3char, $strChars, true) === true) {
-                        ++$maybeUTF32LE;
-                    }
-                    unset($countChars[$test3char]);
-                }
-            }
-        }
-
-        $maybeUTF32BE = 0;
-        $test = \mb_convert_encoding($str, 'UTF-8', 'UTF-32BE');
-        if ($test) {
-            $test2 = \mb_convert_encoding($test, 'UTF-32BE', 'UTF-8');
-            $test3 = \mb_convert_encoding($test2, 'UTF-8', 'UTF-32BE');
-            if ($test3 === $test) {
-                if (\count($strChars) === 0) {
-                    $strChars = $this->count_chars($str, true, false);
-                }
-                $countChars = $this->count_chars($test3);
-                foreach ($countChars as $test3char => $test3charEmpty) {
-                    if (\in_array($test3char, $strChars, true) === true) {
-                        ++$maybeUTF32BE;
-                    }
-                    unset($countChars[$test3char]);
-                }
-            }
-        }
-
-        if ($maybeUTF32BE !== $maybeUTF32LE) {
-            if ($maybeUTF32LE > $maybeUTF32BE) {
-                return 1;
-            }
-
-            return 2;
-        }
-
-        return false;
-    }
-
-    private function is_binary($input, $strict = false)
-    {
-        $input = (string)$input;
-        if ($input === '') {
-            return false;
-        }
-
-        if (preg_match('~^[01]+$~', $input)) {
-            return true;
-        }
-
-        $ext = $this->get_file_type($input);
-        if ($ext['type'] === 'binary') {
-            return true;
-        }
-
-        $testLength = \strlen($input);
-        $testNull = \substr_count($input, "\x0", 0, $testLength);
-        if (($testNull / $testLength) > 0.25) {
-            return true;
-        }
-
-        if ($strict === true) {
-            if ($this->SUPPORT['finfo'] === false) {
-                throw new \RuntimeException('ext-fileinfo: is not installed');
-            }
-
-            /** @noinspection PhpComposerExtensionStubsInspection */
-            $finfo_encoding = (new \finfo(\FILEINFO_MIME_ENCODING))->buffer($input);
-            if ($finfo_encoding && $finfo_encoding === 'binary') {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function get_file_type(
-        $str,
-        $fallback = [
-            'ext' => null,
-            'mime' => 'application/octet-stream',
-            'type' => null,
-        ]
-    ) {
-        if ($str === '') {
-            return $fallback;
-        }
-
-        $str_info = \substr($str, 0, 2);
-        if ($str_info === false || \strlen($str_info) !== 2) {
-            return $fallback;
-        }
-
-        $str_info = \unpack('C2chars', $str_info);
-        if ($str_info === false) {
-            return $fallback;
-        }
-        $type_code = (int)($str_info['chars1'] . $str_info['chars2']);
-
-        switch ($type_code) {
-            case 3780:
-                $ext = 'pdf';
-                $mime = 'application/pdf';
-                $type = 'binary';
-
-                break;
-            case 7790:
-                $ext = 'exe';
-                $mime = 'application/octet-stream';
-                $type = 'binary';
-
-                break;
-            case 7784:
-                $ext = 'midi';
-                $mime = 'audio/x-midi';
-                $type = 'binary';
-
-                break;
-            case 8075:
-                $ext = 'zip';
-                $mime = 'application/zip';
-                $type = 'binary';
-
-                break;
-            case 8297:
-                $ext = 'rar';
-                $mime = 'application/rar';
-                $type = 'binary';
-
-                break;
-            case 255216:
-                $ext = 'jpg';
-                $mime = 'image/jpeg';
-                $type = 'binary';
-
-                break;
-            case 7173:
-                $ext = 'gif';
-                $mime = 'image/gif';
-                $type = 'binary';
-
-                break;
-            case 6677:
-                $ext = 'bmp';
-                $mime = 'image/bmp';
-                $type = 'binary';
-
-                break;
-            case 13780:
-                $ext = 'png';
-                $mime = 'image/png';
-                $type = 'binary';
-
-                break;
-            default:
-                return $fallback;
-        }
-
-        return [
-            'ext' => $ext,
-            'mime' => $mime,
-            'type' => $type,
-        ];
-    }
-
-    private function count_chars($str, $cleanUtf8 = false, $tryToUseMbFunction = true)
-    {
-        return array_count_values($this->strSplit($str, 1, $cleanUtf8, $tryToUseMbFunction));
     }
 
 }

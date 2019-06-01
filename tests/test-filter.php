@@ -50,9 +50,10 @@ class SanitiseTest extends TestCase
         $this->sanitise->disinfect('test@test.com', 'email');
 
         $result = $this->sanitise->result();
-        if ($result->isValid()) {
-            echo "\nValid";
-        }
+        $this->assertTrue($result->isValid());
+//        if ($result->isValid()) {
+//            echo "\nValid";
+//        }
     }
 
 //
