@@ -58,13 +58,17 @@ class Strings
             $string = stripslashes($string);
         }
 
+
+
         if ($this->getOption('trim') == 1) {
             $string = trim($string);
         }
+
         if ($this->getOption('trimControl') == 1) {
-            $characters    = "\\x00-\\x1F";
+            $characters    = "[[:cntrl:]]";
             $string = trim( preg_replace( "/".$characters."]+/" , '' , $string ) , $characters );
         }
+
 
         if ($this->getOption('striptags') == 1) {
             $string = strip_tags($string);
