@@ -59,16 +59,14 @@ class Strings
         }
 
 
-
         if ($this->getOption('trim') == 1) {
             $string = trim($string);
         }
 
         if ($this->getOption('trimControl') == 1) {
             $characters    = "[[:cntrl:]]";
-            $string = trim( preg_replace( "/".$characters."]+/" , '' , $string ) , $characters );
+            $string =  preg_replace( "/".$characters."]+/" , '' , $string  );
         }
-
 
         if ($this->getOption('striptags') == 1) {
             $string = strip_tags($string);
