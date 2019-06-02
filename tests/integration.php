@@ -16,30 +16,28 @@ class integration extends TestCase
 
     function testIntegration()
     {
-//        $xss = $this->security->xss();
+        $xss = $this->security->xss();
         $sanitise = $this->security->sanitise();
 
 
         echo "\nXSS";
-        $string = 'Visit my website http://www.doajob.org?redirect=https://www.google.com';
-//        echo "\nString: " . $string;
-//        $cleanString = $xss->clean($string);
-//        echo "\nString: " . $cleanString;
-//        echo "\n";
-//        echo "\nXSS Url";
-//        $string = 'Visit my website http://www.doajob.org?redirect=https://www.google.com';
-//        echo "\nString: " . $string;
-//        $cleanString = $xss->cleanUrl($string);
-//        echo "\nString: " . $cleanString;
-//        echo "\n";
-//        echo "\nSanitiser";
+        $unCleanString = 'Visit my website http://www.doajob.org?redirect=https://www.google.com';
 
-        echo "\nString: " . $sanitise->removeUrl($string);
+
+
+        echo "\nUnclean String: " . $unCleanString;
+        $cleanString = $xss->clean($unCleanString);
+        echo "\nXSS Cleaned String: " . $cleanString;
+        $cleanString = $xss->cleanUrl($unCleanString);
+        echo "\nXSS Cleaned Url: " . $cleanString;
+        echo "\n";
+
+        echo "\nSanitised Url: " . $sanitise->removeUrl($unCleanString);
         if ($sanitise->isSanitised()) {
             echo "\n1";
         }
 
-        echo "\nString: " . $sanitise->removeUrl("Rob WIlson");
+        echo "\nString without a Url: " . $sanitise->removeUrl("Rob WIlson");
         if ($sanitise->isSanitised()) {
             echo "\n1";
         }

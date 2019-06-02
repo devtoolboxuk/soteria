@@ -13,7 +13,7 @@ class SoteriaService implements SoteriaInterface
      * @param bool $force
      * @return Sanitise|null
      */
-    public function sanitise($force = false)
+    public function sanitise($force = true)
     {
         if (self::$instance === null || $force) {
             self::$instance = new Sanitise();
@@ -25,7 +25,7 @@ class SoteriaService implements SoteriaInterface
      * @param bool $force
      * @return Xss|null
      */
-    public function xss($force = false)
+    public function xss($force = true)
     {
         if (self::$instance === null || $force) {
             self::$instance = new Xss();
