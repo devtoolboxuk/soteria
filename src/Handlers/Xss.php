@@ -3,17 +3,17 @@
 namespace devtoolboxuk\soteria\handlers;
 
 use devtoolboxuk\soteria\models\SoteriaModel;
-use devtoolboxuk\soteria\voku\Resources\Attributes;
 
-use devtoolboxuk\soteria\voku\Resources\Exploded;
-use devtoolboxuk\soteria\voku\Resources\Html;
-use devtoolboxuk\soteria\voku\Resources\JavaScript;
-use devtoolboxuk\soteria\voku\Resources\NeverAllowed;
+use devtoolboxuk\soteriautf\Resources\Attributes;
+use devtoolboxuk\soteriautf\Resources\Exploded;
+use devtoolboxuk\soteriautf\Resources\Html;
+use devtoolboxuk\soteriautf\Resources\JavaScript;
+use devtoolboxuk\soteriautf\Resources\NeverAllowed;
+use devtoolboxuk\soteriautf\Resources\System;
+use devtoolboxuk\soteriautf\Resources\StringResource;
 
-use devtoolboxuk\soteria\voku\Resources\System;
-use devtoolboxuk\soteria\voku\Resources\Utf7;
-use devtoolboxuk\soteria\voku\Resources\Utf8;
-use devtoolboxuk\soteria\voku\Resources\StringResource;
+use devtoolboxuk\soteriautf\Utf8;
+use devtoolboxuk\soteriautf\Utf7;
 
 
 class Xss
@@ -41,6 +41,7 @@ class Xss
 
     function init()
     {
+
         $this->neverAllowed = new NeverAllowed();
 
         $this->exploded = new Exploded();
@@ -343,7 +344,7 @@ class Xss
     private function _get_data($file)
     {
         /** @noinspection PhpIncludeInspection */
-        return include __DIR__ . '/../voku/Data/' . $file . '.php';
+        return include __DIR__ . '/../vendor/devtoolboxuk/soteriautf/src/Data/' . $file . '.php';
     }
 
     public function cleanString($str)
