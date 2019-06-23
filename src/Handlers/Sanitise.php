@@ -44,10 +44,9 @@ class Sanitise
             return $data;
         }
 
-        $this->input = $data;
-
-        $data = $this->strings->clean($data);
+        $this->input = $data = trim($data);
         $data = $this->urlService->remove($data);
+        $data = trim($data);
 
         if ($this->input != $data) {
             $this->_sanitised = true;
@@ -75,7 +74,7 @@ class Sanitise
             return $data;
         }
 
-        $this->input = $data;
+        $this->input = $data = trim($data);
         $data = $this->strings->clean($data);
         $data = mb_convert_encoding($data, $toEncoding, $fromEncoding);
         $data = htmlspecialchars_decode($data);
@@ -115,7 +114,7 @@ class Sanitise
             return $data;
         }
 
-        $this->input = $data;
+        $this->input = $data = trim($data);
 
         $data = $this->strings->clean($data);
         $data = $this->strings->stringLength($data, $stringLength);

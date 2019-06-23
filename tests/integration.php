@@ -14,7 +14,19 @@ class integration extends TestCase
         $this->security = new SoteriaService();
     }
 
-    function testIntegration()
+    function testEmailForUrl()
+    {
+        $sanitise = $this->security->sanitise();
+        $email = 'test@hotmail.com';
+        echo "\nUnclean String: " . $email;
+        echo "\n";
+        echo "\nSanitised Url: " . $sanitise->removeUrl($email);
+        if ($sanitise->isSanitised()) {
+            echo "\n1";
+        }
+    }
+
+    function inte()
     {
         $xss = $this->security->xss();
         $sanitise = $this->security->sanitise();
@@ -22,7 +34,6 @@ class integration extends TestCase
 
         echo "\nXSS";
         $unCleanString = 'Visit my website http://www.doajob.org?redirect=https://www.google.com';
-
 
 
         echo "\nUnclean String: " . $unCleanString;
