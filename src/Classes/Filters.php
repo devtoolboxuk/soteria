@@ -13,9 +13,14 @@ class Filters
      */
     public function filterEmail($data)
     {
+        $valid = false;
+        if (filter_var($data, FILTER_VALIDATE_EMAIL)) {
+            $valid = true;
+        }
+
         return new FilterModel(
             filter_var($data, FILTER_SANITIZE_EMAIL),
-            filter_var($data, FILTER_VALIDATE_EMAIL)
+            $valid
         );
     }
 
@@ -36,9 +41,14 @@ class Filters
      */
     public function filterFloat($data)
     {
+        $valid = false;
+        if (filter_var($data, FILTER_VALIDATE_FLOAT)) {
+            $valid = true;
+        }
+
         return new FilterModel(
             filter_var($data, FILTER_SANITIZE_NUMBER_FLOAT),
-            filter_var($data, FILTER_VALIDATE_FLOAT)
+            $valid
         );
     }
 
@@ -58,9 +68,14 @@ class Filters
      */
     public function filterInt($data)
     {
+        $valid = false;
+        if ( filter_var((int)$data, FILTER_VALIDATE_INT)) {
+            $valid = true;
+        }
+
         return new FilterModel(
             filter_var($data, FILTER_SANITIZE_NUMBER_INT),
-            filter_var((int)$data, FILTER_VALIDATE_INT)
+            $valid
         );
 
     }
@@ -83,10 +98,14 @@ class Filters
      */
     public function filterUrl($data)
     {
+        $valid = false;
+        if ( filter_var((int)$data, FILTER_VALIDATE_URL)) {
+            $valid = true;
+        }
 
         return new FilterModel(
             filter_var($data, FILTER_SANITIZE_URL),
-            filter_var($data, FILTER_VALIDATE_URL)
+            $valid
         );
     }
 
@@ -99,7 +118,6 @@ class Filters
         return new FilterModel(
             filter_var($data, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES)
         );
-
     }
 
     /**
@@ -108,7 +126,6 @@ class Filters
      */
     public function filterSpecial($data)
     {
-
         return new FilterModel(
             filter_var($data, FILTER_SANITIZE_SPECIAL_CHARS)
         );
