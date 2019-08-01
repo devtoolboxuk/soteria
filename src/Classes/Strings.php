@@ -64,8 +64,7 @@ class Strings
         }
 
         if ($this->getOption('trimControl') == 1) {
-            $characters    = "[[:cntrl:]]";
-            $string =  preg_replace( "/".$characters."]+/" , '' , $string  );
+            $string =  preg_replace( '/[[:cntrl:]]/', '',$string);
         }
 
         if ($this->getOption('striptags') == 1) {
