@@ -167,6 +167,42 @@ class Sanitise
 
 
     /**
+     * @param $str
+     * @return mixed|string
+     */
+    public function decodeHtmlEntity($str)
+    {
+        $ret = html_entity_decode($str, ENT_COMPAT, 'UTF-8');
+        $p2 = -1;
+        for (; ;) {
+            $p = strpos($ret, '&#', $p2 + 1);
+            if ($p === false) {
+                break;
+            }
+            $p2 = strpos($ret, ';', $p);
+            if ($p2 === false) {
+                break;
+            }
+
+            if (substr($ret, $p + 2, 1) == 'x') {
+                $char = hexdec(substr($ret, $p + 3, $p2 - $p - 3));
+            } else {
+                $char = intval(substr($ret, $p + 2, $p2 - $p - 2));
+            }
+
+            $newchar = iconv(
+                'UCS-4', 'UTF-8',
+                chr(($char >> 24) & 0xFF) . chr(($char >> 16) & 0xFF) . chr(($char >> 8) & 0xFF) . chr($char & 0xFF)
+            );
+
+            $ret = substr_replace($ret, $newchar, $p, 1 + $p2 - $p);
+            $p2 = $p + strlen($newchar);
+        }
+        return $ret;
+    }
+
+
+    /**
      * @return null
      */
     public function isSanitised()
