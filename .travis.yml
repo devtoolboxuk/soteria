@@ -6,7 +6,7 @@ language: php
 # Define the php versions against we want to test our code
 php:
   - 7.2
-  - 5.4
+  - 5.6
 
 # Note: Code coverage requires php-xDebug extension enabled on CI server
 
