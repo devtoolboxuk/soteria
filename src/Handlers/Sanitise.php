@@ -162,7 +162,7 @@ class Sanitise
 
         $this->is_valid = $filterResult->isValid();
         $this->output = $filterResult->getResult();
-        return $this->output;
+        return $this->decodeHtmlEntity($this->output);
     }
 
 
