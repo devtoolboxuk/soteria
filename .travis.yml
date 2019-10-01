@@ -2,11 +2,13 @@
 # Validate this file here - http://lint.travis-ci.org/
 
 language: php
+dist: trusty
 
 # Define the php versions against we want to test our code
 php:
-  - 7.2
+  - 7.3
   - 5.6
+  - 5.4
 
 # Note: Code coverage requires php-xDebug extension enabled on CI server
 
